@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# builds
+dist/
+build/
+coverage/
+
+# environment
+.env
+.env.*
+!.env.example
+
+# tooling caches
+.vite/
+.eslintcache
+*.tsbuildinfo
+
+# tests
+playwright-report/
+test-results/
+
+# supabase local
+supabase/.branches/
+supabase/.temp/
+
+# logs and OS files
+*.log
+.DS_Store
