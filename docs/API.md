@@ -2,20 +2,138 @@
 
 Base URL: `/api`
 
-All responses are JSON. Errors use the envelope:
+All responses are JSON. Successful responses use a `data` envelope:
 
 ```json
-{ "error": { "code": "ROOM_UNAVAILABLE", "message": "That room is full." } }
+{ "data": { "...": "..." } }
 ```
+
+Errors use:
+
+```json
+{ "error": { "code": "VALIDATION_ERROR", "message": "Some fields are invalid.", "fields": {} } }
+```
+
+Protected routes require `Authorization: Bearer <supabase-jwt>`.
 
 ## Health
 
 ### `GET /api/health`
 
-Public. Returns the service status and the open application session.
+Public. Returns service status and the open application session.
 
 ```json
 { "status": "ok", "session": "2026/2027", "uptime": 12.34 }
 ```
 
-Further endpoints are documented as each phase is implemented.
+## Authentication
+
+### `POST /api/auth/register`
+
+Public. Creates the auth user, profile, and student record.
+
+Request body:
+
+```json
+{
+  "first_name": "Ada",
+  "last_name": "Okafor",
+  "matric_no": "UI/2023/1042",
+  "faculty": "Science",
+  "department": "Computer Science",
+  "level": 300,
+  "gender": "female",
+  "email": "ada.okafor@example.com",
+  "password": "correct-horse",
+  "phone": "08012345678"
+}
+```
+
+Responses: `201` with the created user and student; `409` if the matriculation
+number or email is already registered; `422` for validation errors.
+
+### `GET /api/me`
+
+Student or admin. Returns the current user, student record (or `null` for an
+administrator), and the open session.
+
+## Students
+
+### `GET /api/students/me`
+
+Student. Returns the current student record.
+
+### `PUT /api/students/me`
+
+Student. Updates profile fields. The matriculation number and email cannot be
+changed here.
+
+Request body (any subset):
+
+```json
+{
+  "first_name": "Ada",
+  "last_name": "Okafor",
+  "gender": "female",
+  "faculty": "Science",
+  "department": "Computer Science",
+  "level": 300,
+  "phone": "08012345678"
+}
+```
+
+## Applications
+
+### `POST /api/applications`
+
+Student. Submits an application for the open session.
+
+Request body:
+
+```json
+{ "session": "2026/2027", "preference": "Queen Idia Hall" }
+```
+
+Responses: `201`; `409 APPLICATION_EXISTS` if the student already applied this
+session; `409 ALREADY_ALLOCATED` if they already hold an allocation; `422
+SESSION_CLOSED` or `PROFILE_INCOMPLETE`.
+
+### `GET /api/applications/me`
+
+Student. Lists the current student's applications, newest first.
+
+### `GET /api/applications/me/:id`
+
+Student. Returns one of the current student's applications.
+
+## Status
+
+### `GET /api/status/me`
+
+Student. Returns the student record, latest application, and active allocation
+(with hostel name and room number) when present.
+
+```json
+{
+  "data": {
+    "student": { "...": "..." },
+    "application": { "status": "pending", "...": "..." },
+    "allocation": null
+  }
+}
+```
+
+## Error codes
+
+| Code                 | Meaning                                        |
+| -------------------- | ---------------------------------------------- |
+| `UNAUTHENTICATED`    | Missing, invalid, or expired token             |
+| `FORBIDDEN`          | Role does not permit the action                |
+| `VALIDATION_ERROR`   | Request body failed validation                 |
+| `PROFILE_INCOMPLETE` | Student profile is missing details             |
+| `PROFILE_MISSING`    | No student record for the user                 |
+| `APPLICATION_EXISTS` | Duplicate application for the session          |
+| `ALREADY_ALLOCATED`  | Student already has an active allocation       |
+| `SESSION_CLOSED`     | Application session is not open                |
+| `ROOM_UNAVAILABLE`   | Room is full or unavailable (allocation phase) |
+| `INTERNAL_ERROR`     | Unexpected server error                        |

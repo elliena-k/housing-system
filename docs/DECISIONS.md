@@ -49,3 +49,25 @@ when a decision changes.
 - **Alternatives:** Application-level checks with optimistic retries.
 - **Consequences:** Room availability is enforced at the database level. The API
   maps database error codes to HTTP 409 responses.
+
+## D-006 — Application eligibility
+
+- **Context:** The report says administrators check eligibility but does not
+  define it.
+- **Decision:** A student may apply when the account is active, the profile is
+  complete, there is no application for the open session, and there is no active
+  allocation.
+- **Alternatives:** Leave eligibility to manual administrator review.
+- **Consequences:** Rules live in the applications service and can grow without
+  changing routes. The report should document this definition.
+
+## D-007 — Configuration without credentials
+
+- **Context:** The team must be able to build and run tests before Supabase
+  credentials are available.
+- **Decision:** The API creates the service-role client lazily and returns a clear
+  configuration error only when a database-backed route is used.
+- **Alternatives:** Fail at process startup when credentials are missing.
+- **Consequences:** Type checks, unit tests, and the health endpoint work without
+  secrets. Runtime features that need the database fail with
+  `SUPABASE_NOT_CONFIGURED` until the environment is configured.
