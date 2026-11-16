@@ -2,6 +2,8 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { RequireRole } from './auth/RequireRole';
 import { AppLayout } from './layouts/AppLayout';
 import { AdminDashboardPage } from './pages/admin/DashboardPage';
+import { AdminHostelsPage } from './pages/admin/HostelsPage';
+import { AdminRoomsPage } from './pages/admin/RoomsPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { ApplicationPage } from './pages/student/ApplicationPage';
@@ -39,6 +41,8 @@ export function App() {
         }
       >
         <Route index element={<AdminDashboardPage />} />
+        <Route path="hostels" element={<AdminHostelsPage />} />
+        <Route path="rooms" element={<AdminRoomsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/login" replace />} />

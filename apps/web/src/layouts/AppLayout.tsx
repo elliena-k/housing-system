@@ -15,7 +15,11 @@ const studentLinks: NavItem[] = [
   { to: '/student/application', label: 'Application' },
 ];
 
-const adminLinks: NavItem[] = [{ to: '/admin', label: 'Dashboard', end: true }];
+const adminLinks: NavItem[] = [
+  { to: '/admin', label: 'Dashboard', end: true },
+  { to: '/admin/hostels', label: 'Hostels' },
+  { to: '/admin/rooms', label: 'Rooms' },
+];
 
 export function AppLayout() {
   const { user, student, signOut } = useAuth();

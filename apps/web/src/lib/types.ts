@@ -1,4 +1,13 @@
-import type { AllocationStatus, ApplicationStatus, Gender, Level, UserRole } from '@housing/shared';
+import type {
+  AllocationStatus,
+  ApplicationStatus,
+  Gender,
+  HostelGenderType,
+  HostelStatus,
+  Level,
+  RoomStatus,
+  UserRole,
+} from '@housing/shared';
 
 export interface Student {
   id: string;
@@ -54,4 +63,24 @@ export interface StudentStatus {
   student: Student;
   application: Application | null;
   allocation: AllocationDetails | null;
+}
+
+export interface Hostel {
+  id: string;
+  name: string;
+  location: string | null;
+  capacity: number | null;
+  gender_type: HostelGenderType;
+  status: HostelStatus;
+  created_at: string;
+}
+
+export interface Room {
+  id: string;
+  hostel_id: string;
+  room_number: string;
+  capacity: number;
+  occupancy: number;
+  status: RoomStatus;
+  created_at: string;
 }

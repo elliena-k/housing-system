@@ -8,6 +8,7 @@ room allocation, built with React + TypeScript, Express, and Supabase.
 Phase 0 — repository scaffold and tooling (complete).
 Phase 1 — database, authentication, and roles (code complete).
 Phase 2 — student profile, application, and status journey (code complete).
+Phase 3 — hostel and room inventory (code complete).
 
 Live testing against Supabase is pending project credentials.
 
@@ -82,6 +83,7 @@ Database migrations live in `supabase/migrations`.
 - Housing application with validation and eligibility checks
 - Application listing and status view
 - Allocation details on the student dashboard
+- Administrator hostel and room management with an availability filter
 - Row-level security and a lock-safe allocation function in the database
 
 ## Scripts
