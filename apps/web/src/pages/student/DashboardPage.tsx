@@ -12,12 +12,12 @@ export function StudentDashboardPage() {
   });
 
   if (statusQuery.isLoading) {
-    return <p className="text-slate-600">Loading your dashboard...</p>;
+    return <p className="text-ink-600">Loading your dashboard...</p>;
   }
 
   if (statusQuery.isError || !statusQuery.data) {
     return (
-      <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+      <div className="rounded-md border border-danger bg-danger-light px-4 py-3 text-sm text-danger-dark">
         {statusQuery.error instanceof Error
           ? statusQuery.error.message
           : 'Could not load your dashboard.'}
@@ -35,12 +35,12 @@ export function StudentDashboardPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+        <section className="rounded-lg border border-ink-200 bg-surface p-5 shadow-sm">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-500">
             Application
           </h2>
           {application ? (
-            <div className="mt-3 space-y-2 text-sm text-slate-700">
+            <div className="mt-3 space-y-2 text-sm text-ink-700">
               <p>
                 Session: <span className="font-medium">{application.session}</span>
               </p>
@@ -53,7 +53,7 @@ export function StudentDashboardPage() {
               </Link>
             </div>
           ) : (
-            <div className="mt-3 space-y-3 text-sm text-slate-700">
+            <div className="mt-3 space-y-3 text-sm text-ink-700">
               <p>You have not applied for accommodation yet.</p>
               <Link className="inline-block underline" to="/student/apply">
                 Apply now
@@ -62,12 +62,10 @@ export function StudentDashboardPage() {
           )}
         </section>
 
-        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-            Allocation
-          </h2>
+        <section className="rounded-lg border border-ink-200 bg-surface p-5 shadow-sm">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-500">Allocation</h2>
           {allocation ? (
-            <div className="mt-3 space-y-1 text-sm text-slate-700">
+            <div className="mt-3 space-y-1 text-sm text-ink-700">
               <p>
                 Hostel: <span className="font-medium">{allocation.hostel_name ?? '—'}</span>
               </p>
@@ -76,28 +74,28 @@ export function StudentDashboardPage() {
               </p>
             </div>
           ) : (
-            <p className="mt-3 text-sm text-slate-700">No room has been allocated yet.</p>
+            <p className="mt-3 text-sm text-ink-700">No room has been allocated yet.</p>
           )}
         </section>
       </div>
 
-      <section className="mt-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Profile</h2>
-        <dl className="mt-3 grid gap-2 text-sm text-slate-700 sm:grid-cols-2">
+      <section className="mt-4 rounded-lg border border-ink-200 bg-surface p-5 shadow-sm">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-500">Profile</h2>
+        <dl className="mt-3 grid gap-2 text-sm text-ink-700 sm:grid-cols-2">
           <div>
-            <dt className="text-slate-500">Faculty</dt>
+            <dt className="text-ink-500">Faculty</dt>
             <dd className="font-medium">{student.faculty}</dd>
           </div>
           <div>
-            <dt className="text-slate-500">Department</dt>
+            <dt className="text-ink-500">Department</dt>
             <dd className="font-medium">{student.department}</dd>
           </div>
           <div>
-            <dt className="text-slate-500">Email</dt>
+            <dt className="text-ink-500">Email</dt>
             <dd className="font-medium">{student.email}</dd>
           </div>
           <div>
-            <dt className="text-slate-500">Phone</dt>
+            <dt className="text-ink-500">Phone</dt>
             <dd className="font-medium">{student.phone ?? '—'}</dd>
           </div>
         </dl>

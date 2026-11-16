@@ -30,12 +30,12 @@ export function AppLayout() {
   const displayName = student ? `${student.first_name} ${student.last_name}` : 'Administrator';
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="min-h-screen bg-surface-1">
+      <header className="border-b border-ink-200 bg-surface">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-8">
           <div>
-            <p className="text-xs uppercase tracking-wide text-slate-500">University of Ibadan</p>
-            <p className="text-sm font-semibold text-slate-900">Housing Allocation</p>
+            <p className="text-xs uppercase tracking-wide text-ink-500">University of Ibadan</p>
+            <p className="text-sm font-semibold text-ink-900">Housing Allocation</p>
           </div>
           <nav className="flex flex-wrap items-center gap-1">
             {links.map((link) => (
@@ -45,7 +45,7 @@ export function AppLayout() {
                 end={link.end}
                 className={({ isActive }) =>
                   `rounded px-2.5 py-1.5 text-sm ${
-                    isActive ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100'
+                    isActive ? 'bg-primary text-white' : 'text-ink-700 hover:bg-ink-100'
                   }`
                 }
               >
@@ -54,7 +54,7 @@ export function AppLayout() {
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-slate-600">{displayName}</span>
+            <span className="text-sm text-ink-600">{displayName}</span>
             <Button variant="secondary" onClick={handleSignOut}>
               Sign out
             </Button>

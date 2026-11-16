@@ -53,12 +53,12 @@ export function ApplyPage() {
   });
 
   if (accountQuery.isLoading || statusQuery.isLoading) {
-    return <p className="text-slate-600">Loading your application form...</p>;
+    return <p className="text-ink-600">Loading your application form...</p>;
   }
 
   if (accountQuery.isError || statusQuery.isError || !accountQuery.data) {
     return (
-      <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+      <div className="rounded-md border border-danger bg-danger-light px-4 py-3 text-sm text-danger-dark">
         Could not load your application form. Please refresh the page.
       </div>
     );
@@ -68,7 +68,7 @@ export function ApplyPage() {
 
   if (!student) {
     return (
-      <div className="rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      <div className="rounded-md border border-warning bg-warning-light px-4 py-3 text-sm text-warning-dark">
         Your student profile is incomplete. Contact the administrator.
       </div>
     );
@@ -80,8 +80,8 @@ export function ApplyPage() {
     return (
       <div>
         <PageHeader title="Housing application" />
-        <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-slate-700">
+        <div className="rounded-lg border border-ink-200 bg-surface p-6 shadow-sm">
+          <p className="text-ink-700">
             You have already applied for the {existing.session} session.
           </p>
           <Link className="mt-3 inline-block underline" to="/student/application">
@@ -100,34 +100,32 @@ export function ApplyPage() {
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:col-span-1">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-            Applicant
-          </h2>
-          <dl className="mt-3 space-y-2 text-sm text-slate-700">
+        <section className="rounded-lg border border-ink-200 bg-surface p-5 shadow-sm lg:col-span-1">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-500">Applicant</h2>
+          <dl className="mt-3 space-y-2 text-sm text-ink-700">
             <div>
-              <dt className="text-slate-500">Name</dt>
+              <dt className="text-ink-500">Name</dt>
               <dd className="font-medium">
                 {student.first_name} {student.last_name}
               </dd>
             </div>
             <div>
-              <dt className="text-slate-500">Matriculation number</dt>
+              <dt className="text-ink-500">Matriculation number</dt>
               <dd className="font-medium">{student.matric_no}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Level</dt>
+              <dt className="text-ink-500">Level</dt>
               <dd className="font-medium">{student.level}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Session</dt>
+              <dt className="text-ink-500">Session</dt>
               <dd className="font-medium">{session}</dd>
             </div>
           </dl>
         </section>
 
         <form
-          className="space-y-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2"
+          className="space-y-4 rounded-lg border border-ink-200 bg-surface p-6 shadow-sm lg:col-span-2"
           onSubmit={onSubmit}
           noValidate
         >
@@ -139,7 +137,7 @@ export function ApplyPage() {
             error={errors.preference?.message}
             {...register('preference')}
           />
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-ink-600">
             Submit one application per session. You can check its status from your dashboard.
           </p>
           <Button type="submit" disabled={isSubmitting || mutation.isPending}>

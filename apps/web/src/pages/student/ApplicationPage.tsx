@@ -12,12 +12,12 @@ export function ApplicationPage() {
   });
 
   if (applicationsQuery.isLoading) {
-    return <p className="text-slate-600">Loading your application...</p>;
+    return <p className="text-ink-600">Loading your application...</p>;
   }
 
   if (applicationsQuery.isError || !applicationsQuery.data) {
     return (
-      <div className="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+      <div className="rounded-md border border-danger bg-danger-light px-4 py-3 text-sm text-danger-dark">
         Could not load your application.
       </div>
     );
@@ -29,8 +29,8 @@ export function ApplicationPage() {
     return (
       <div>
         <PageHeader title="Your application" />
-        <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-slate-700">You have not submitted an application yet.</p>
+        <div className="rounded-lg border border-ink-200 bg-surface p-6 shadow-sm">
+          <p className="text-ink-700">You have not submitted an application yet.</p>
           <Link className="mt-3 inline-block underline" to="/student/apply">
             Apply for accommodation
           </Link>
@@ -47,22 +47,22 @@ export function ApplicationPage() {
         actions={<StatusBadge status={application.status} />}
       />
 
-      <section className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <dl className="grid gap-4 text-sm text-slate-700 sm:grid-cols-2">
+      <section className="rounded-lg border border-ink-200 bg-surface p-6 shadow-sm">
+        <dl className="grid gap-4 text-sm text-ink-700 sm:grid-cols-2">
           <div>
-            <dt className="text-slate-500">Session</dt>
+            <dt className="text-ink-500">Session</dt>
             <dd className="font-medium">{application.session}</dd>
           </div>
           <div>
-            <dt className="text-slate-500">Date submitted</dt>
+            <dt className="text-ink-500">Date submitted</dt>
             <dd className="font-medium">{application.application_date}</dd>
           </div>
           <div>
-            <dt className="text-slate-500">Preference</dt>
+            <dt className="text-ink-500">Preference</dt>
             <dd className="font-medium">{application.preference ?? 'No preference'}</dd>
           </div>
           <div>
-            <dt className="text-slate-500">Remarks</dt>
+            <dt className="text-ink-500">Remarks</dt>
             <dd className="font-medium">{application.remarks ?? '—'}</dd>
           </div>
         </dl>

@@ -12,7 +12,7 @@ export function RequireRole({ role, children }: RequireRoleProps) {
   const { loading, session, user } = useAuth();
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-600">Loading your account...</div>;
+    return <div className="p-8 text-center text-ink-600">Loading your account...</div>;
   }
 
   if (!session) {
@@ -22,7 +22,7 @@ export function RequireRole({ role, children }: RequireRoleProps) {
   if (!user) {
     return (
       <div className="mx-auto max-w-md p-8 text-center">
-        <p className="text-slate-700">We could not load your account.</p>
+        <p className="text-ink-700">We could not load your account.</p>
         <Link className="mt-3 inline-block underline" to="/login">
           Sign in again
         </Link>

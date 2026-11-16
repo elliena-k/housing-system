@@ -71,3 +71,16 @@ when a decision changes.
 - **Consequences:** Type checks, unit tests, and the health endpoint work without
   secrets. Runtime features that need the database fail with
   `SUPABASE_NOT_CONFIGURED` until the environment is configured.
+
+## D-008 — Design system
+
+- **Context:** The team wants a consistent visual language and likes the Home
+  Owners design system.
+- **Decision:** Reuse the Home Owners token structure (palette scales, ink
+  neutrals, semantic statuses, radius and type scale, CSS variables) with a new
+  royal blue and gold palette.
+- **Alternatives:** Keep default Tailwind colours; design a new system from
+  scratch.
+- **Consequences:** All UI uses shared tokens. Changing the brand colour later
+  means editing the palette in `tailwind.config.js` and `src/index.css`, not
+  component classes. The system is documented in `docs/DESIGN.md`.

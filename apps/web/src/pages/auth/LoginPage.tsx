@@ -60,13 +60,13 @@ export function LoginPage() {
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-10">
       <div className="mb-6 text-center">
-        <p className="text-xs uppercase tracking-wide text-slate-500">University of Ibadan</p>
-        <h1 className="mt-1 text-2xl font-semibold text-slate-900">Housing Allocation</h1>
-        <p className="mt-1 text-sm text-slate-600">Sign in to continue.</p>
+        <p className="text-xs uppercase tracking-wide text-ink-500">University of Ibadan</p>
+        <h1 className="mt-1 text-display font-semibold text-ink-900">Housing Allocation</h1>
+        <p className="mt-1 text-sm text-ink-600">Sign in to continue.</p>
       </div>
 
       <form
-        className="space-y-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+        className="space-y-4 rounded-lg border border-ink-200 bg-surface p-6 shadow-sm"
         onSubmit={onSubmit}
         noValidate
       >
@@ -90,7 +90,7 @@ export function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-4 text-center text-sm text-slate-600">
+      <p className="mt-4 text-center text-sm text-ink-600">
         New student?{' '}
         <Link className="font-medium underline" to="/register">
           Create an account
