@@ -4,6 +4,11 @@ import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
 import { env } from './config/env.js';
 import { logger } from './config/logger.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import { applicationsRouter } from './modules/applications/routes.js';
+import { authRouter, meRouter } from './modules/auth/routes.js';
+import { statusRouter } from './modules/status/routes.js';
+import { studentsRouter } from './modules/students/routes.js';
 
 export const app = express();
 
@@ -20,6 +25,12 @@ app.get('/api/health', (_request, response) => {
   });
 });
 
+app.use('/api/auth', authRouter);
+app.use('/api', meRouter);
+app.use('/api/students', studentsRouter);
+app.use('/api/applications', applicationsRouter);
+app.use('/api/status', statusRouter);
+
 app.use((_request, response) => {
   response.status(404).json({
     error: {
@@ -28,3 +39,5 @@ app.use((_request, response) => {
     },
   });
 });
+
+app.use(errorHandler);
