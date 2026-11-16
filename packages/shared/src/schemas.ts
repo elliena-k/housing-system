@@ -88,3 +88,38 @@ export const createApplicationSchema = z.object({
   preference: z.string().trim().max(200).optional(),
 });
 export type CreateApplicationInput = z.infer<typeof createApplicationSchema>;
+
+export const createHostelSchema = z.object({
+  name: z.string().trim().min(2, 'Enter the hostel name.').max(120),
+  location: z.string().trim().max(120).optional(),
+  capacity: z.coerce.number().int().positive().optional(),
+  gender_type: hostelGenderTypeSchema.optional(),
+  status: hostelStatusSchema.optional(),
+});
+export type CreateHostelInput = z.infer<typeof createHostelSchema>;
+
+export const updateHostelSchema = createHostelSchema
+  .partial()
+  .refine((value) => Object.keys(value).length > 0, {
+    message: 'Provide at least one field to update.',
+  });
+export type UpdateHostelInput = z.infer<typeof updateHostelSchema>;
+
+export const createRoomSchema = z.object({
+  hostel_id: z.string().uuid('Choose a hostel.'),
+  room_number: z.string().trim().min(1, 'Enter the room number.').max(30),
+  capacity: z.coerce.number().int().positive().max(50),
+  status: roomStatusSchema.optional(),
+});
+export type CreateRoomInput = z.infer<typeof createRoomSchema>;
+
+export const updateRoomSchema = z
+  .object({
+    room_number: z.string().trim().min(1).max(30).optional(),
+    capacity: z.coerce.number().int().positive().max(50).optional(),
+    status: roomStatusSchema.optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0, {
+    message: 'Provide at least one field to update.',
+  });
+export type UpdateRoomInput = z.infer<typeof updateRoomSchema>;

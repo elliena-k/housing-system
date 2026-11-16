@@ -15,15 +15,19 @@ describe('GET /api/health', () => {
 });
 
 describe('authentication guard', () => {
-  it.each(['/api/me', '/api/students/me', '/api/applications/me', '/api/status/me'])(
-    'rejects unauthenticated access to %s',
-    async (path) => {
-      const response = await request(app).get(path);
+  it.each([
+    '/api/me',
+    '/api/students/me',
+    '/api/applications/me',
+    '/api/status/me',
+    '/api/admin/hostels',
+    '/api/admin/rooms',
+  ])('rejects unauthenticated access to %s', async (path) => {
+    const response = await request(app).get(path);
 
-      expect(response.status).toBe(401);
-      expect(response.body.error.code).toBe('UNAUTHENTICATED');
-    }
-  );
+    expect(response.status).toBe(401);
+    expect(response.body.error.code).toBe('UNAUTHENTICATED');
+  });
 });
 
 describe('registration validation', () => {

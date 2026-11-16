@@ -84,3 +84,12 @@ when a decision changes.
 - **Consequences:** All UI uses shared tokens. Changing the brand colour later
   means editing the palette in `tailwind.config.js` and `src/index.css`, not
   component classes. The system is documented in `docs/DESIGN.md`.
+
+## D-009 — Available-room filtering
+
+- **Context:** An available room has `occupancy < capacity`, which cannot be
+  expressed as a simple PostgREST column-to-column filter.
+- **Decision:** Fetch the candidate rooms and filter them in the rooms service.
+- **Alternatives:** Add a database view or an RPC function for availability.
+- **Consequences:** The logic is simple and correct. For a larger dataset, move
+  the comparison into a view or function so filtering happens in the database.

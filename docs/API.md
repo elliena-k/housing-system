@@ -123,6 +123,46 @@ Student. Returns the student record, latest application, and active allocation
 }
 ```
 
+## Hostels and rooms
+
+### `GET /api/hostels`
+
+Student or admin. Lists all hostels.
+
+### `POST /api/admin/hostels`
+
+Admin. Creates a hostel.
+
+```json
+{ "name": "Kuti Hall", "location": "North Campus", "capacity": 120, "gender_type": "male" }
+```
+
+### `PATCH /api/admin/hostels/:id`
+
+Admin. Updates hostel details, including status.
+
+### `GET /api/admin/rooms`
+
+Admin. Lists rooms. Query parameters: `hostel_id` (UUID) and `status`
+(`available`, `occupied`, `maintenance`).
+
+### `GET /api/admin/rooms/available`
+
+Admin. Lists rooms with free space. Optional `hostel_id` filter.
+
+### `POST /api/admin/rooms`
+
+Admin. Creates a room.
+
+```json
+{ "hostel_id": "<uuid>", "room_number": "A101", "capacity": 4 }
+```
+
+### `PATCH /api/admin/rooms/:id`
+
+Admin. Updates room number, capacity, or status. Capacity cannot fall below the
+current occupancy.
+
 ## Error codes
 
 | Code                 | Meaning                                        |
