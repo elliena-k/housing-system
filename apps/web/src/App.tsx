@@ -1,15 +1,51 @@
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { RequireRole } from './auth/RequireRole';
+import { AppLayout } from './layouts/AppLayout';
+import { AdminDashboardPage } from './pages/admin/DashboardPage';
+import { AdminHostelsPage } from './pages/admin/HostelsPage';
+import { AdminRoomsPage } from './pages/admin/RoomsPage';
+import { LoginPage } from './pages/auth/LoginPage';
+import { RegisterPage } from './pages/auth/RegisterPage';
+import { ApplicationPage } from './pages/student/ApplicationPage';
+import { ApplyPage } from './pages/student/ApplyPage';
+import { StudentDashboardPage } from './pages/student/DashboardPage';
+import { ProfilePage } from './pages/student/ProfilePage';
+
 export function App() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-3xl flex-col justify-center gap-3 p-8">
-      <p className="text-sm font-medium uppercase tracking-wide text-slate-500">
-        University of Ibadan
-      </p>
-      <h1 className="text-3xl font-semibold text-slate-900">
-        Housing Allocation and Management System
-      </h1>
-      <p className="text-slate-600">
-        Phase 0 scaffold. Authentication and housing workflows arrive in the next phase.
-      </p>
-    </main>
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+
+      <Route
+        path="/student"
+        element={
+          <RequireRole role="student">
+            <AppLayout />
+          </RequireRole>
+        }
+      >
+        <Route index element={<StudentDashboardPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="apply" element={<ApplyPage />} />
+        <Route path="application" element={<ApplicationPage />} />
+      </Route>
+
+      <Route
+        path="/admin"
+        element={
+          <RequireRole role="admin">
+            <AppLayout />
+          </RequireRole>
+        }
+      >
+        <Route index element={<AdminDashboardPage />} />
+        <Route path="hostels" element={<AdminHostelsPage />} />
+        <Route path="rooms" element={<AdminRoomsPage />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
 }
