@@ -84,3 +84,28 @@ export interface Room {
   status: RoomStatus;
   created_at: string;
 }
+
+export interface ApplicationWithStudent extends Application {
+  student: Student | null;
+}
+
+export interface AllocationListItem {
+  id: string;
+  student_id: string;
+  application_id: string;
+  hostel_id: string;
+  room_id: string;
+  allocation_date: string;
+  status: AllocationStatus;
+  hostel_name: string | null;
+  room_number: string | null;
+  student_name: string | null;
+  matric_no: string | null;
+}
+
+export interface AdminStats {
+  applications: Record<ApplicationStatus, number>;
+  roomsAvailable: number;
+  activeAllocations: number;
+  totalStudents: number;
+}
