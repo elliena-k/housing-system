@@ -53,3 +53,15 @@ describe('unknown routes', () => {
     expect(response.body.error.code).toBe('NOT_FOUND');
   });
 });
+
+describe('request parsing', () => {
+  it('returns a structured error for malformed JSON', async () => {
+    const response = await request(app)
+      .post('/api/auth/register')
+      .set('Content-Type', 'application/json')
+      .send('{"broken":');
+
+    expect(response.status).toBe(400);
+    expect(response.body.error.code).toBe('INVALID_JSON');
+  });
+});

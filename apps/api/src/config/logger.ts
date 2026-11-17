@@ -3,4 +3,8 @@ import { env } from './env.js';
 
 export const logger = pino({
   level: env.NODE_ENV === 'test' ? 'silent' : 'info',
+  redact: {
+    paths: ['req.headers.authorization', 'req.headers.cookie', 'res.headers["set-cookie"]'],
+    remove: true,
+  },
 });

@@ -10,6 +10,8 @@ Phase 1 — database, authentication, and roles (code complete).
 Phase 2 — student profile, application, and status journey (code complete).
 Phase 3 — hostel and room inventory (code complete).
 Phase 4 — application processing, allocation, and cancellation (code complete).
+Phase 5 — hardening and acceptance test plan (code complete; live acceptance pending credentials).
+Phase 6 — deployment configuration and documentation (complete; live deployment pending credentials).
 
 Live testing against Supabase is pending project credentials.
 
@@ -86,6 +88,7 @@ Database migrations live in `supabase/migrations`.
 - Allocation details on the student dashboard
 - Administrator hostel and room management with an availability filter
 - Application review (approve or reject), room allocation, cancellation, and dashboard statistics
+- Rate limiting, request limits, redacted logs, readiness checks, and an error boundary
 - Row-level security and a lock-safe allocation function in the database
 
 ## Scripts
@@ -98,6 +101,39 @@ Database migrations live in `supabase/migrations`.
 | `npm run lint`      | Run ESLint                |
 | `npm run format`    | Format with Prettier      |
 | `npm run test`      | Run tests                 |
+
+## Deployment
+
+The intended free-tier deployment is Render for the API, Vercel for the web app,
+and Supabase for the database and authentication.
+
+### API (Render)
+
+`render.yaml` defines the service. Set these environment variables in Render:
+
+- `CORS_ORIGIN` — the deployed web origin (comma-separate multiple origins)
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+The health check is `GET /api/health`; readiness is `GET /api/ready`.
+
+### Web (Vercel)
+
+Create a Vercel project with `apps/web` as the root directory:
+
+- Framework preset: Vite
+- Build command: `npm run build`
+- Output directory: `dist`
+- Environment variables: `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+
+`apps/web/vercel.json` rewrites client routes to `index.html`.
+
+### Continuous integration
+
+`.github/workflows/ci.yml` runs lint, type-check, tests, and the production
+build on every push to `main` and on pull requests.
+
+See `docs/TEST-PLAN.md` for the acceptance suite.
 
 ## Documentation
 

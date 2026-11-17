@@ -26,6 +26,13 @@ Public. Returns service status and the open application session.
 { "status": "ok", "session": "2026/2027", "uptime": 12.34 }
 ```
 
+### `GET /api/ready`
+
+Public. Checks database connectivity. Returns `200 {"status":"ready"}` or
+`503 {"status":"not_ready"}`.
+
+Registration is rate limited to 20 attempts per 15 minutes per client.
+
 ## Authentication
 
 ### `POST /api/auth/register`

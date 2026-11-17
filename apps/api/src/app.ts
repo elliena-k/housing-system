@@ -4,7 +4,9 @@ import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
 import { env } from './config/env.js';
 import { logger } from './config/logger.js';
+import { getSupabaseAdmin } from './config/supabase.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { asyncHandler } from './utils/asyncHandler.js';
 import { adminApplicationsRouter } from './modules/applications/adminRoutes.js';
 import { applicationsRouter } from './modules/applications/routes.js';
 import { adminAllocationsRouter } from './modules/allocations/routes.js';
@@ -18,9 +20,23 @@ import { studentsRouter } from './modules/students/routes.js';
 
 export const app = express();
 
+const allowedOrigins = env.CORS_ORIGIN.split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.set('trust proxy', 1);
 app.use(helmet());
-app.use(cors({ origin: env.CORS_ORIGIN }));
-app.use(express.json());
+app.use(
+  cors({
+    origin:
+      allowedOrigins.length === 0
+        ? true
+        : allowedOrigins.length === 1
+          ? (allowedOrigins[0] ?? true)
+          : allowedOrigins,
+  })
+);
+app.use(express.json({ limit: '100kb' }));
 app.use(pinoHttp({ logger, autoLogging: env.NODE_ENV !== 'test' }));
 
 app.get('/api/health', (_request, response) => {
@@ -30,6 +46,25 @@ app.get('/api/health', (_request, response) => {
     uptime: process.uptime(),
   });
 });
+
+app.get(
+  '/api/ready',
+  asyncHandler(async (_request, response) => {
+    try {
+      const admin = getSupabaseAdmin();
+      const { error } = await admin
+        .from('hostels')
+        .select('id', { count: 'exact', head: true })
+        .limit(1);
+      if (error) {
+        throw error;
+      }
+      response.json({ status: 'ready' });
+    } catch {
+      response.status(503).json({ status: 'not_ready' });
+    }
+  })
+);
 
 app.use('/api/auth', authRouter);
 app.use('/api', meRouter);

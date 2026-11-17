@@ -112,3 +112,23 @@ when a decision changes.
 - **Alternatives:** Application-level checks with retries.
 - **Consequences:** The database enforces availability, gender, and single-active-
   allocation rules. API errors are stable and readable for the frontend.
+
+## D-012 — Hardening baseline
+
+- **Context:** The prototype handles student data and will be deployed publicly.
+- **Decision:** Trust the deployment proxy, rate-limit registration, cap request
+  bodies at 100 kB, redact authorization headers from logs, return structured
+  errors for malformed JSON and oversized bodies, add an error boundary, and
+  expose a readiness endpoint.
+- **Alternatives:** Rely on platform defaults only.
+- **Consequences:** Common abuse and failure modes produce predictable responses.
+  Readiness supports deploy health checks without exposing internals.
+
+## D-013 — Deployment targets
+
+- **Context:** The team needs a free-tier deployment for the demo.
+- **Decision:** Render (API), Vercel (web), Supabase (database and auth), with
+  GitHub Actions running lint, type-check, tests, and build.
+- **Alternatives:** A single container on one host.
+- **Consequences:** Each layer is configured independently through environment
+  variables. `CORS_ORIGIN` and `VITE_API_URL` must match the deployed origins.
