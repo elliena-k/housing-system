@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: housing-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build -w @housing/shared && npm run build -w @housing/api
+    startCommand: npm run start -w @housing/api
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: OPEN_SESSION
+        value: 2026/2027
+      - key: CORS_ORIGIN
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false

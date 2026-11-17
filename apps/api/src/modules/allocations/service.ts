@@ -22,7 +22,7 @@ interface RoomSummary {
 
 type DatabaseError = { message?: string; code?: string };
 
-function allocationError(error: DatabaseError): AppError {
+export function mapAllocationError(error: DatabaseError): AppError {
   const message = error.message ?? '';
 
   const mappings: ReadonlyArray<readonly [string, number, string, string]> = [
@@ -71,7 +71,7 @@ export async function allocateRoom(
   });
 
   if (error) {
-    throw allocationError(error);
+    throw mapAllocationError(error);
   }
 
   return data as AllocationRow;
@@ -85,7 +85,7 @@ export async function cancelAllocation(id: string, adminId: string): Promise<All
   });
 
   if (error) {
-    throw allocationError(error);
+    throw mapAllocationError(error);
   }
 
   return data as AllocationRow;
