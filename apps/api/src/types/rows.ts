@@ -79,3 +79,14 @@ export interface RoomRow {
   status: RoomStatus;
   created_at: string;
 }
+
+export interface ApplicationWithStudent extends ApplicationRow {
+  student: StudentRow | null;
+}
+
+export interface AllocationListItem extends AllocationRow {
+  student_name: string | null;
+  matric_no: string | null;
+  hostel_name: string | null;
+  room_number: string | null;
+}
