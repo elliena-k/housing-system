@@ -123,3 +123,30 @@ export const updateRoomSchema = z
     message: 'Provide at least one field to update.',
   });
 export type UpdateRoomInput = z.infer<typeof updateRoomSchema>;
+
+export const reviewApplicationSchema = z.object({
+  status: z.enum(['approved', 'rejected']),
+  remarks: z.string().trim().max(500).optional(),
+});
+export type ReviewApplicationInput = z.infer<typeof reviewApplicationSchema>;
+
+export const createAllocationSchema = z.object({
+  application_id: z.string().uuid('Choose an application.'),
+  room_id: z.string().uuid('Choose a room.'),
+});
+export type CreateAllocationInput = z.infer<typeof createAllocationSchema>;
+
+export const adminApplicationFilterSchema = z.object({
+  status: applicationStatusSchema.optional(),
+  session: z
+    .string()
+    .regex(/^\d{4}\/\d{4}$/, 'Session must look like 2026/2027')
+    .optional(),
+  q: z.string().trim().max(80).optional(),
+});
+export type AdminApplicationFilter = z.infer<typeof adminApplicationFilterSchema>;
+
+export const studentSearchSchema = z.object({
+  q: z.string().trim().max(80).optional(),
+});
+export type StudentSearch = z.infer<typeof studentSearchSchema>;

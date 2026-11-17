@@ -93,3 +93,22 @@ when a decision changes.
 - **Alternatives:** Add a database view or an RPC function for availability.
 - **Consequences:** The logic is simple and correct. For a larger dataset, move
   the comparison into a view or function so filtering happens in the database.
+
+## D-010 — Admin application search
+
+- **Context:** Searching applications by student name or matriculation number
+  spans two tables.
+- **Decision:** Resolve matching student IDs first, then filter applications by
+  those IDs.
+- **Alternatives:** PostgREST embedded-resource filters.
+- **Consequences:** The query is explicit and easy to reason about. It costs one
+  extra round trip and is capped at 200 matching students per search.
+
+## D-011 — Allocation through a database function
+
+- **Context:** Allocation must be atomic and safe under concurrent requests.
+- **Decision:** Call the `allocate_room` Postgres function through Supabase RPC
+  and map its error codes to HTTP responses.
+- **Alternatives:** Application-level checks with retries.
+- **Consequences:** The database enforces availability, gender, and single-active-
+  allocation rules. API errors are stable and readable for the frontend.

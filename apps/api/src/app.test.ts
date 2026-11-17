@@ -22,6 +22,10 @@ describe('authentication guard', () => {
     '/api/status/me',
     '/api/admin/hostels',
     '/api/admin/rooms',
+    '/api/admin/applications',
+    '/api/admin/students',
+    '/api/admin/allocations',
+    '/api/admin/stats',
   ])('rejects unauthenticated access to %s', async (path) => {
     const response = await request(app).get(path);
 

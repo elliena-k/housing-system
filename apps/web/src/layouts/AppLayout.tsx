@@ -17,6 +17,8 @@ const studentLinks: NavItem[] = [
 
 const adminLinks: NavItem[] = [
   { to: '/admin', label: 'Dashboard', end: true },
+  { to: '/admin/applications', label: 'Applications' },
+  { to: '/admin/allocations', label: 'Allocations' },
   { to: '/admin/hostels', label: 'Hostels' },
   { to: '/admin/rooms', label: 'Rooms' },
 ];

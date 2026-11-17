@@ -163,6 +163,63 @@ Admin. Creates a room.
 Admin. Updates room number, capacity, or status. Capacity cannot fall below the
 current occupancy.
 
+## Admin applications
+
+### `GET /api/admin/applications`
+
+Admin. Lists applications with student details. Query parameters: `status`,
+`session`, and `q` (student name or matriculation number).
+
+### `GET /api/admin/applications/:id`
+
+Admin. Returns one application with student details.
+
+### `PATCH /api/admin/applications/:id`
+
+Admin. Reviews a pending application.
+
+```json
+{ "status": "approved", "remarks": "Eligible for accommodation." }
+```
+
+`status` must be `approved` or `rejected`. Only pending applications can be
+reviewed; otherwise the API returns `409 INVALID_STATUS_TRANSITION`.
+
+## Admin students
+
+### `GET /api/admin/students`
+
+Admin. Lists students, optionally filtered with `q` (name or matriculation
+number).
+
+## Allocations
+
+### `GET /api/admin/allocations`
+
+Admin. Lists allocations with student, hostel, and room details.
+
+### `POST /api/admin/allocations`
+
+Admin. Allocates a room to an approved application. Calls the `allocate_room`
+database function, which locks the rows and enforces availability and gender
+rules.
+
+```json
+{ "application_id": "<uuid>", "room_id": "<uuid>" }
+```
+
+### `PATCH /api/admin/allocations/:id/cancel`
+
+Admin. Cancels an active allocation, frees the bed, and returns the application
+to `approved`.
+
+## Admin statistics
+
+### `GET /api/admin/stats`
+
+Admin. Returns application counts by status, rooms with free space, active
+allocations, and total students.
+
 ## Error codes
 
 | Code                 | Meaning                                        |

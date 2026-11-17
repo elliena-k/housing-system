@@ -1,6 +1,8 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { RequireRole } from './auth/RequireRole';
 import { AppLayout } from './layouts/AppLayout';
+import { AdminAllocationsPage } from './pages/admin/AllocationsPage';
+import { AdminApplicationsPage } from './pages/admin/ApplicationsPage';
 import { AdminDashboardPage } from './pages/admin/DashboardPage';
 import { AdminHostelsPage } from './pages/admin/HostelsPage';
 import { AdminRoomsPage } from './pages/admin/RoomsPage';
@@ -41,6 +43,8 @@ export function App() {
         }
       >
         <Route index element={<AdminDashboardPage />} />
+        <Route path="applications" element={<AdminApplicationsPage />} />
+        <Route path="allocations" element={<AdminAllocationsPage />} />
         <Route path="hostels" element={<AdminHostelsPage />} />
         <Route path="rooms" element={<AdminRoomsPage />} />
       </Route>
