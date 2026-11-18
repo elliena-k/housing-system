@@ -23,7 +23,11 @@ export async function searchStudents(input: StudentSearch): Promise<StudentRow[]
   const { data, error } = await query;
 
   if (error) {
-    throw new AppError(500, 'STUDENTS_LOOKUP_FAILED', 'Could not load students.');
+    throw new AppError(
+      500,
+      'STUDENTS_LOOKUP_FAILED',
+      'We could not load students. Please try again.'
+    );
   }
 
   return (data ?? []) as StudentRow[];

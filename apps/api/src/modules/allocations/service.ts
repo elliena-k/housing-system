@@ -26,23 +26,53 @@ export function mapAllocationError(error: DatabaseError): AppError {
   const message = error.message ?? '';
 
   const mappings: ReadonlyArray<readonly [string, number, string, string]> = [
-    ['APPLICATION_NOT_FOUND', 404, 'APPLICATION_NOT_FOUND', 'That application was not found.'],
     [
-      'APPLICATION_NOT_APPROVED',
-      409,
-      'APPLICATION_NOT_APPROVED',
-      'Only approved applications can be allocated.',
+      'APPLICATION_NOT_FOUND',
+      404,
+      'APPLICATION_NOT_FOUND',
+      'That application was not found. Refresh the list and try again.',
     ],
-    ['ROOM_NOT_FOUND', 404, 'ROOM_NOT_FOUND', 'That room was not found.'],
-    ['ROOM_UNAVAILABLE', 409, 'ROOM_UNAVAILABLE', 'That room is full or unavailable.'],
-    ['HOSTEL_INACTIVE', 409, 'HOSTEL_INACTIVE', 'That hostel is inactive.'],
-    ['GENDER_MISMATCH', 409, 'GENDER_MISMATCH', 'The room does not match the student gender.'],
-    ['ALLOCATION_NOT_FOUND', 404, 'ALLOCATION_NOT_FOUND', 'That allocation was not found.'],
+    [
+      'APPLICATION_NOT_APPROVED',
+      409,
+      'APPLICATION_NOT_APPROVED',
+      'Only approved applications can be allocated. Approve the application first.',
+    ],
+    [
+      'ROOM_NOT_FOUND',
+      404,
+      'ROOM_NOT_FOUND',
+      'That room was not found. Refresh the list and try again.',
+    ],
+    [
+      'ROOM_UNAVAILABLE',
+      409,
+      'ROOM_UNAVAILABLE',
+      'That room is full or unavailable. Choose another room.',
+    ],
+    [
+      'HOSTEL_INACTIVE',
+      409,
+      'HOSTEL_INACTIVE',
+      'That hostel is inactive. Choose an active hostel.',
+    ],
+    [
+      'GENDER_MISMATCH',
+      409,
+      'GENDER_MISMATCH',
+      'This hostel does not match the student gender. Choose a compatible hostel.',
+    ],
+    [
+      'ALLOCATION_NOT_FOUND',
+      404,
+      'ALLOCATION_NOT_FOUND',
+      'That allocation was not found. Refresh the list and try again.',
+    ],
     [
       'ALLOCATION_NOT_ACTIVE',
       409,
       'ALLOCATION_NOT_ACTIVE',
-      'Only active allocations can be cancelled.',
+      'This allocation is already cancelled.',
     ],
   ];
 
@@ -53,10 +83,18 @@ export function mapAllocationError(error: DatabaseError): AppError {
   }
 
   if (error.code === '23505') {
-    return new AppError(409, 'ALREADY_ALLOCATED', 'This student already has an active allocation.');
+    return new AppError(
+      409,
+      'ALREADY_ALLOCATED',
+      'This student already has an active allocation. Cancel it before allocating another room.'
+    );
   }
 
-  return new AppError(500, 'ALLOCATION_FAILED', 'Could not complete the allocation.');
+  return new AppError(
+    500,
+    'ALLOCATION_FAILED',
+    'We could not complete the allocation. Please try again.'
+  );
 }
 
 export async function allocateRoom(
@@ -99,7 +137,11 @@ export async function listAllocations(): Promise<AllocationListItem[]> {
     .order('allocation_date', { ascending: false });
 
   if (error) {
-    throw new AppError(500, 'ALLOCATIONS_LOOKUP_FAILED', 'Could not load allocations.');
+    throw new AppError(
+      500,
+      'ALLOCATIONS_LOOKUP_FAILED',
+      'We could not load allocations. Please try again.'
+    );
   }
 
   const rows = (data ?? []) as AllocationRow[];
@@ -118,7 +160,11 @@ export async function listAllocations(): Promise<AllocationListItem[]> {
   ]);
 
   if (studentsResult.error || hostelsResult.error || roomsResult.error) {
-    throw new AppError(500, 'ALLOCATIONS_LOOKUP_FAILED', 'Could not load allocation details.');
+    throw new AppError(
+      500,
+      'ALLOCATIONS_LOOKUP_FAILED',
+      'We could not load allocation details. Please try again.'
+    );
   }
 
   const students = new Map(

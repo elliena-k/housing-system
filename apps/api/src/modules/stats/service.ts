@@ -22,7 +22,11 @@ export async function getAdminStats(): Promise<AdminStats> {
         .eq('status', status);
 
       if (error) {
-        throw new AppError(500, 'STATS_LOOKUP_FAILED', 'Could not load statistics.');
+        throw new AppError(
+          500,
+          'STATS_LOOKUP_FAILED',
+          'We could not load statistics. Please try again.'
+        );
       }
 
       return [status, count ?? 0] as const;
@@ -36,7 +40,11 @@ export async function getAdminStats(): Promise<AdminStats> {
   ]);
 
   if (roomsResult.error || allocationsResult.error || studentsResult.error) {
-    throw new AppError(500, 'STATS_LOOKUP_FAILED', 'Could not load statistics.');
+    throw new AppError(
+      500,
+      'STATS_LOOKUP_FAILED',
+      'We could not load statistics. Please try again.'
+    );
   }
 
   const rooms = (roomsResult.data ?? []) as {
