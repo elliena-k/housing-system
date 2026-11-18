@@ -1,4 +1,8 @@
 {
+  "framework": "vite",
+  "installCommand": "cd ../.. && npm ci --ignore-scripts && npm run build -w @housing/shared",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/(.*)",
