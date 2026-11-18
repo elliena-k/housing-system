@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface DrawerProps {
   open: boolean;
@@ -9,6 +10,8 @@ interface DrawerProps {
 
 export function Drawer({ open, title, onClose, children }: DrawerProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
+  useFocusTrap(panelRef, open);
 
   useEffect(() => {
     if (!open) {
@@ -40,6 +43,7 @@ export function Drawer({ open, title, onClose, children }: DrawerProps) {
         onClick={onClose}
       />
       <aside
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label={title}

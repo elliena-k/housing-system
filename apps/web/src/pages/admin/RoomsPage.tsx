@@ -309,7 +309,7 @@ export function AdminRoomsPage() {
           ) : null}
 
           {rooms.length > 0 ? (
-            <section className="overflow-hidden rounded-lg border border-ink-200 bg-surface shadow-sm">
+            <section className="hidden overflow-hidden rounded-lg border border-ink-200 bg-surface shadow-sm md:block">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-surface-1 text-xs uppercase tracking-wide text-ink-500">
@@ -353,6 +353,37 @@ export function AdminRoomsPage() {
                 </table>
               </div>
             </section>
+          ) : null}
+
+          {rooms.length > 0 ? (
+            <div className="space-y-3 md:hidden">
+              {rooms.map((room) => (
+                <article
+                  key={room.id}
+                  className="rounded-lg border border-ink-200 bg-surface p-4 shadow-sm"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-medium text-ink-900">
+                        {hostelNames.get(room.hostel_id) ?? 'Unknown hostel'}
+                      </p>
+                      <p className="text-sm text-ink-600">Room {room.room_number}</p>
+                    </div>
+                    <span
+                      className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${roomStatusStyles[room.status]}`}
+                    >
+                      {roomStatusLabel(room.status)}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-sm text-ink-600">
+                    Occupancy: {room.occupancy} / {room.capacity}
+                  </p>
+                  <Button className="mt-3" variant="secondary" onClick={() => setEditing(room)}>
+                    Edit room
+                  </Button>
+                </article>
+              ))}
+            </div>
           ) : null}
         </div>
       </div>

@@ -262,7 +262,7 @@ export function AdminAllocationsPage() {
               retrying={allocationsQuery.isFetching}
             />
           ) : null}
-          <div className="overflow-hidden rounded-lg border border-ink-200 bg-surface shadow-sm">
+          <div className="hidden overflow-hidden rounded-lg border border-ink-200 bg-surface shadow-sm md:block">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead className="bg-surface-1 text-xs uppercase tracking-wide text-ink-500">
@@ -336,8 +336,7 @@ export function AdminAllocationsPage() {
                           <button
                             type="button"
                             className="text-sm font-medium text-danger underline"
-                            disabled={cancelMutation.isPending}
-                            onClick={() => cancelMutation.mutate(allocation.id)}
+                            onClick={() => setPendingCancel(allocation)}
                           >
                             Cancel
                           </button>
@@ -349,6 +348,58 @@ export function AdminAllocationsPage() {
               </table>
             </div>
           </div>
+
+          {allocations.length > 0 ? (
+            <div className="space-y-3 md:hidden">
+              {allocations.map((allocation) => (
+                <article
+                  key={allocation.id}
+                  className="rounded-lg border border-ink-200 bg-surface p-4 shadow-sm"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-medium text-ink-900">
+                        {allocation.student_name ?? 'Unknown student'}
+                      </p>
+                      <p className="text-sm text-ink-600">{allocation.matric_no ?? '—'}</p>
+                    </div>
+                    <span
+                      className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+                        allocation.status === 'active'
+                          ? 'border-success bg-success-light text-success-dark'
+                          : 'border-ink-300 bg-ink-100 text-ink-600'
+                      }`}
+                    >
+                      {allocation.status === 'active' ? 'Active' : 'Cancelled'}
+                    </span>
+                  </div>
+                  <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <dt className="text-xs uppercase tracking-wide text-ink-500">Hostel</dt>
+                      <dd className="text-ink-700">{allocation.hostel_name ?? '—'}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs uppercase tracking-wide text-ink-500">Room</dt>
+                      <dd className="text-ink-700">{allocation.room_number ?? '—'}</dd>
+                    </div>
+                    <div className="col-span-2">
+                      <dt className="text-xs uppercase tracking-wide text-ink-500">Allocated</dt>
+                      <dd className="text-ink-700">{formatDate(allocation.allocation_date)}</dd>
+                    </div>
+                  </dl>
+                  {allocation.status === 'active' ? (
+                    <Button
+                      className="mt-3"
+                      variant="secondary"
+                      onClick={() => setPendingCancel(allocation)}
+                    >
+                      Cancel allocation
+                    </Button>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          ) : null}
         </section>
       </div>
 

@@ -268,7 +268,7 @@ export function AdminApplicationsPage() {
       ) : null}
 
       {applications.length > 0 ? (
-        <div className="overflow-hidden rounded-lg border border-ink-200 bg-surface shadow-sm">
+        <div className="hidden overflow-hidden rounded-lg border border-ink-200 bg-surface shadow-sm md:block">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-surface-1 text-xs uppercase tracking-wide text-ink-500">
@@ -313,6 +313,46 @@ export function AdminApplicationsPage() {
               </tbody>
             </table>
           </div>
+        </div>
+      ) : null}
+
+      {applications.length > 0 ? (
+        <div className="space-y-3 md:hidden">
+          {applications.map((application) => (
+            <article
+              key={application.id}
+              className="rounded-lg border border-ink-200 bg-surface p-4 shadow-sm"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="font-medium text-ink-900">
+                    {application.student
+                      ? `${application.student.first_name} ${application.student.last_name}`
+                      : 'Unknown student'}
+                  </p>
+                  <p className="text-sm text-ink-600">{application.student?.matric_no ?? '—'}</p>
+                </div>
+                <StatusBadge status={application.status} />
+              </div>
+              <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-ink-500">Session</dt>
+                  <dd className="text-ink-700">{application.session}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs uppercase tracking-wide text-ink-500">Submitted</dt>
+                  <dd className="text-ink-700">{formatDate(application.application_date)}</dd>
+                </div>
+              </dl>
+              <Button
+                className="mt-3"
+                variant="secondary"
+                onClick={() => setSelectedId(application.id)}
+              >
+                View application
+              </Button>
+            </article>
+          ))}
         </div>
       ) : null}
 

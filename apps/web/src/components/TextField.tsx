@@ -15,6 +15,10 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
   ref
 ) {
   const inputId = id ?? name;
+  const describedBy =
+    [hint ? `${inputId}-hint` : null, error ? `${inputId}-error` : null]
+      .filter(Boolean)
+      .join(' ') || undefined;
 
   return (
     <div className="space-y-1">
@@ -36,7 +40,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
           name={name}
           aria-invalid={Boolean(error)}
           aria-required={requirement === 'required'}
-          aria-describedby={hint ? `${inputId}-hint` : undefined}
+          aria-describedby={describedBy}
           className={`min-h-[44px] w-full rounded-md border bg-surface px-3 py-2 text-sm text-ink-900 outline-none transition placeholder:text-ink-400 focus:border-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-400 ${
             error ? 'border-danger' : 'border-ink-300'
           } ${trailing ? 'pr-12' : ''} ${className}`}
@@ -52,7 +56,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
         </p>
       ) : null}
       {error ? (
-        <p className="text-sm text-danger" role="alert">
+        <p className="text-sm text-danger" id={`${inputId}-error`} role="alert">
           {error}
         </p>
       ) : null}

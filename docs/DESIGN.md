@@ -133,6 +133,13 @@ custom CSS and future dark-mode work.
   confirmation. Dialogs support loading states and Escape to close.
 - **Registration:** three steps (Personal, Academic, Account), with per-step
   validation, preserved values, and a final review before submission.
+- **Responsive tables:** applications, rooms, allocations, and students switch
+  to card layouts on small screens.
+- **Unsaved changes:** the profile form warns before leaving or reloading with
+  unsaved edits and provides a discard action.
+- **Focus and motion:** dialogs trap focus and restore it on close, links and
+  buttons have visible focus outlines, and spinners respect reduced-motion
+  preferences.
 
 ## Accessibility
 

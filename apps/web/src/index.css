@@ -45,3 +45,11 @@
     @apply bg-surface-1 text-ink-900 antialiased;
   }
 }
+
+@layer base {
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--c-primary);
+    outline-offset: 2px;
+  }
+}

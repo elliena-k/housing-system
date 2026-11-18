@@ -32,7 +32,7 @@ export function ProfilePage() {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<UpdateStudentInput>({ resolver: zodResolver(updateStudentSchema) });
 
   useEffect(() => {
@@ -67,6 +67,35 @@ export function ProfilePage() {
   const onSubmit = handleSubmit(async (values) => {
     await mutation.mutateAsync(values);
   });
+
+  const discardChanges = () => {
+    if (!studentQuery.data) {
+      return;
+    }
+    reset({
+      first_name: studentQuery.data.first_name,
+      last_name: studentQuery.data.last_name,
+      gender: studentQuery.data.gender,
+      faculty: studentQuery.data.faculty,
+      department: studentQuery.data.department,
+      level: studentQuery.data.level,
+      phone: studentQuery.data.phone ?? '',
+    });
+  };
+
+  useEffect(() => {
+    if (!isDirty) {
+      return;
+    }
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
 
   if (studentQuery.isLoading) {
     return <LoadingState message="Loading your profile..." />;
@@ -174,9 +203,26 @@ export function ProfilePage() {
           />
         </div>
 
-        <Button type="submit" loading={isSubmitting || mutation.isPending} loadingLabel="Saving...">
-          Save changes
-        </Button>
+        <div className="sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-ink-200 bg-surface/95 p-3 shadow-lg backdrop-blur">
+          <p className="text-sm text-ink-600">
+            {isDirty ? 'You have unsaved changes.' : 'All changes are saved.'}
+          </p>
+          <div className="flex gap-2">
+            {isDirty ? (
+              <Button type="button" variant="secondary" onClick={discardChanges}>
+                Discard
+              </Button>
+            ) : null}
+            <Button
+              type="submit"
+              loading={isSubmitting || mutation.isPending}
+              loadingLabel="Saving..."
+              disabled={!isDirty}
+            >
+              Save changes
+            </Button>
+          </div>
+        </div>
       </form>
     </div>
   );

@@ -54,6 +54,10 @@ export function AppShell() {
   }, [location.pathname]);
 
   useEffect(() => {
+    document.title = `${title} · Housing Allocation`;
+  }, [title]);
+
+  useEffect(() => {
     if (!menuOpen) {
       return;
     }
@@ -148,7 +152,10 @@ export function AppShell() {
             className="absolute inset-0 bg-ink-900/40"
             onClick={() => setMenuOpen(false)}
           />
-          <aside className="relative flex h-full w-72 max-w-[85%] flex-col border-r border-ink-200 bg-surface shadow-xl">
+          <aside
+            id="mobile-menu"
+            className="relative flex h-full w-72 max-w-[85%] flex-col border-r border-ink-200 bg-surface shadow-xl"
+          >
             <div className="flex items-center justify-between border-b border-ink-100 px-5 py-4">
               <div>
                 <p className="text-xs uppercase tracking-wide text-ink-500">University of Ibadan</p>
@@ -175,6 +182,8 @@ export function AppShell() {
               type="button"
               className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-ink-300 text-ink-700 hover:bg-ink-100 lg:hidden"
               aria-label="Open menu"
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
               onClick={() => setMenuOpen(true)}
             >
               <svg
