@@ -1,4 +1,9 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import {
+  createClient,
+  type SupabaseClient,
+  type WebSocketLikeConstructor,
+} from '@supabase/supabase-js';
+import WebSocket from 'ws';
 import { AppError } from '../utils/AppError.js';
 import { env } from './env.js';
 
@@ -23,6 +28,10 @@ export function getSupabaseAdmin(): SupabaseClient {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
+      },
+      // Supabase Realtime needs an explicit WebSocket on Node.js 20.
+      realtime: {
+        transport: WebSocket as unknown as WebSocketLikeConstructor,
       },
     });
   }
