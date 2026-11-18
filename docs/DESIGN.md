@@ -103,6 +103,37 @@ custom CSS and future dark-mode work.
 - **Navigation:** active item uses `bg-primary text-white`; inactive items use
   `text-ink-700` with `hover:bg-ink-100`.
 
+## Forms and feedback
+
+- **Custom select:** every dropdown is an accessible combobox with a custom
+  listbox (keyboard arrows, Home/End, Enter, Escape, click-outside). Native
+  selects remain in the form for value handling but are visually hidden.
+- **Required vs optional:** required fields show a red asterisk; optional fields
+  show a muted `(optional)` label. Filters leave both markers off.
+- **Errors:** messages explain what happened and what to do next. Where a clear
+  next step exists, the error shows a call to action (retry, complete profile,
+  sign in, view application).
+- **Toasts:** successful mutations show a short toast. Errors stay inline next to
+  the form so the user can correct them.
+- **Loading:** every asynchronous action shows a spinner and a progress label on
+  its button, and the button is disabled while pending. Page and table loads use
+  `LoadingState`; retries show a `Retrying...` state.
+
+## Layout and navigation
+
+- **App shell:** desktop sidebar and mobile slide-over drawer with a skip link,
+  page title, active navigation state, and account actions.
+- **Page structure:** consistent page header, toolbar, content surface, and action
+  area. Pages are lazy-loaded with a shared loading fallback.
+- **Tables:** skeletons while loading, explicit empty states, and card fallbacks
+  on small screens where a table would be cramped.
+- **Filters:** search is debounced and filter state is stored in the URL so links
+  can be shared and refreshed safely.
+- **Destructive actions:** cancel allocation and reject application require
+  confirmation. Dialogs support loading states and Escape to close.
+- **Registration:** three steps (Personal, Academic, Account), with per-step
+  validation, preserved values, and a final review before submission.
+
 ## Accessibility
 
 - Body text must meet WCAG AA contrast on its surface.
