@@ -17,7 +17,11 @@ export interface StudentStatus {
 export async function getMyStatus(userId: string): Promise<StudentStatus> {
   const student = await getStudentForUser(userId);
   if (!student) {
-    throw new AppError(404, 'STUDENT_NOT_FOUND', 'Your student profile was not found.');
+    throw new AppError(
+      404,
+      'STUDENT_NOT_FOUND',
+      'Your student profile was not found. Contact the administrator if this is unexpected.'
+    );
   }
 
   const admin = getSupabaseAdmin();
@@ -30,7 +34,11 @@ export async function getMyStatus(userId: string): Promise<StudentStatus> {
     .maybeSingle();
 
   if (applicationError) {
-    throw new AppError(500, 'STATUS_LOOKUP_FAILED', 'Could not load your application status.');
+    throw new AppError(
+      500,
+      'STATUS_LOOKUP_FAILED',
+      'We could not load your application status. Please try again.'
+    );
   }
 
   const { data: allocation, error: allocationError } = await admin
@@ -41,7 +49,11 @@ export async function getMyStatus(userId: string): Promise<StudentStatus> {
     .maybeSingle();
 
   if (allocationError) {
-    throw new AppError(500, 'STATUS_LOOKUP_FAILED', 'Could not load your allocation.');
+    throw new AppError(
+      500,
+      'STATUS_LOOKUP_FAILED',
+      'We could not load your allocation. Please try again.'
+    );
   }
 
   let allocationDetails: AllocationDetails | null = null;

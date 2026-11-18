@@ -22,7 +22,12 @@ function fieldErrors(schema: ZodTypeAny, value: unknown): Record<string, string>
 }
 
 function validationError(fields: Record<string, string>): AppError {
-  return new AppError(422, 'VALIDATION_ERROR', 'Some fields are invalid.', fields);
+  return new AppError(
+    422,
+    'VALIDATION_ERROR',
+    'Some fields need your attention. Check the highlighted fields.',
+    fields
+  );
 }
 
 export function validateBody(schema: ZodTypeAny): RequestHandler {

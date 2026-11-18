@@ -43,7 +43,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setOpenSession(account.session);
       setError(null);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : 'Could not load your account.');
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : 'We could not load your account. Please try again.'
+      );
       setUser(null);
       setStudent(null);
     }

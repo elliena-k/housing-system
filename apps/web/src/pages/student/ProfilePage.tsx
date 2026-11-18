@@ -1,15 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { updateStudentSchema, type UpdateStudentInput } from '@housing/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../auth/AuthProvider';
 import { Button } from '../../components/Button';
+import { ErrorState } from '../../components/ErrorState';
+import { LoadingState } from '../../components/LoadingState';
 import { FormError } from '../../components/FormError';
 import { PageHeader } from '../../components/PageHeader';
 import { SelectField } from '../../components/SelectField';
 import { TextField } from '../../components/TextField';
+import { useToast } from '../../components/Toast';
 import { authedFetch } from '../../lib/api';
+import { errorInfo } from '../../lib/errors';
 import type { Student } from '../../lib/types';
 
 const levels = [100, 200, 300, 400, 500, 600];
@@ -17,7 +21,7 @@ const levels = [100, 200, 300, 400, 500, 600];
 export function ProfilePage() {
   const queryClient = useQueryClient();
   const { refresh } = useAuth();
-  const [saved, setSaved] = useState(false);
+  const { toast } = useToast();
 
   const studentQuery = useQuery({
     queryKey: ['student'],
@@ -28,7 +32,7 @@ export function ProfilePage() {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<UpdateStudentInput>({ resolver: zodResolver(updateStudentSchema) });
 
   useEffect(() => {
@@ -51,27 +55,59 @@ export function ProfilePage() {
     onSuccess: (updated) => {
       queryClient.setQueryData(['student'], updated);
       queryClient.invalidateQueries({ queryKey: ['status'] });
-      setSaved(true);
+      toast({
+        title: 'Profile updated',
+        description: 'Your details have been saved.',
+        variant: 'success',
+      });
       void refresh();
     },
   });
 
   const onSubmit = handleSubmit(async (values) => {
-    setSaved(false);
     await mutation.mutateAsync(values);
   });
 
+  const discardChanges = () => {
+    if (!studentQuery.data) {
+      return;
+    }
+    reset({
+      first_name: studentQuery.data.first_name,
+      last_name: studentQuery.data.last_name,
+      gender: studentQuery.data.gender,
+      faculty: studentQuery.data.faculty,
+      department: studentQuery.data.department,
+      level: studentQuery.data.level,
+      phone: studentQuery.data.phone ?? '',
+    });
+  };
+
+  useEffect(() => {
+    if (!isDirty) {
+      return;
+    }
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
+
   if (studentQuery.isLoading) {
-    return <p className="text-ink-600">Loading your profile...</p>;
+    return <LoadingState message="Loading your profile..." />;
   }
 
   if (studentQuery.isError || !studentQuery.data) {
     return (
-      <div className="rounded-md border border-danger bg-danger-light px-4 py-3 text-sm text-danger-dark">
-        {studentQuery.error instanceof Error
-          ? studentQuery.error.message
-          : 'Could not load your profile.'}
-      </div>
+      <ErrorState
+        message={errorInfo(studentQuery.error, 'We could not load your profile.').message}
+        onRetry={() => void studentQuery.refetch()}
+        retrying={studentQuery.isFetching}
+      />
     );
   }
 
@@ -87,21 +123,21 @@ export function ProfilePage() {
         onSubmit={onSubmit}
         noValidate
       >
-        <FormError message={mutation.error instanceof Error ? mutation.error.message : null} />
-        {saved ? (
-          <div className="rounded-md border border-success bg-success-light px-3 py-2 text-sm text-success-dark">
-            Profile updated.
-          </div>
-        ) : null}
+        <FormError
+          message={mutation.error ? errorInfo(mutation.error).message : null}
+          code={mutation.error ? errorInfo(mutation.error).code : undefined}
+        />
 
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField
             label="First name"
+            requirement="required"
             error={errors.first_name?.message}
             {...register('first_name')}
           />
           <TextField
             label="Last name"
+            requirement="required"
             error={errors.last_name?.message}
             {...register('last_name')}
           />
@@ -123,9 +159,15 @@ export function ProfilePage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <TextField label="Faculty" error={errors.faculty?.message} {...register('faculty')} />
+          <TextField
+            label="Faculty"
+            requirement="required"
+            error={errors.faculty?.message}
+            {...register('faculty')}
+          />
           <TextField
             label="Department"
+            requirement="required"
             error={errors.department?.message}
             {...register('department')}
           />
@@ -134,6 +176,7 @@ export function ProfilePage() {
         <div className="grid gap-4 sm:grid-cols-3">
           <SelectField
             label="Level"
+            requirement="required"
             error={errors.level?.message}
             {...register('level', { valueAsNumber: true })}
           >
@@ -143,20 +186,43 @@ export function ProfilePage() {
               </option>
             ))}
           </SelectField>
-          <SelectField label="Gender" error={errors.gender?.message} {...register('gender')}>
+          <SelectField
+            label="Gender"
+            requirement="required"
+            error={errors.gender?.message}
+            {...register('gender')}
+          >
             <option value="male">Male</option>
             <option value="female">Female</option>
           </SelectField>
           <TextField
-            label="Phone (optional)"
+            label="Phone"
+            requirement="optional"
             error={errors.phone?.message}
             {...register('phone')}
           />
         </div>
 
-        <Button type="submit" disabled={isSubmitting || mutation.isPending}>
-          {isSubmitting || mutation.isPending ? 'Saving...' : 'Save changes'}
-        </Button>
+        <div className="sticky bottom-3 z-10 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-ink-200 bg-surface/95 p-3 shadow-lg backdrop-blur">
+          <p className="text-sm text-ink-600">
+            {isDirty ? 'You have unsaved changes.' : 'All changes are saved.'}
+          </p>
+          <div className="flex gap-2">
+            {isDirty ? (
+              <Button type="button" variant="secondary" onClick={discardChanges}>
+                Discard
+              </Button>
+            ) : null}
+            <Button
+              type="submit"
+              loading={isSubmitting || mutation.isPending}
+              loadingLabel="Saving..."
+              disabled={!isDirty}
+            >
+              Save changes
+            </Button>
+          </div>
+        </div>
       </form>
     </div>
   );

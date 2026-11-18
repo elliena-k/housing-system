@@ -32,7 +32,11 @@ export const authenticate: RequestHandler = asyncHandler(async (request, _respon
   const { data, error } = await admin.auth.getUser(token);
 
   if (error || !data.user) {
-    throw new AppError(401, 'UNAUTHENTICATED', 'Your session is invalid or has expired.');
+    throw new AppError(
+      401,
+      'UNAUTHENTICATED',
+      'Your session is invalid or has expired. Please sign in again.'
+    );
   }
 
   const { data: profile, error: profileError } = await admin
@@ -42,15 +46,27 @@ export const authenticate: RequestHandler = asyncHandler(async (request, _respon
     .maybeSingle();
 
   if (profileError) {
-    throw new AppError(500, 'PROFILE_LOOKUP_FAILED', 'Could not load your profile.');
+    throw new AppError(
+      500,
+      'PROFILE_LOOKUP_FAILED',
+      'We could not load your profile. Please try again.'
+    );
   }
 
   const row = profile as ProfileRow | null;
   if (!row) {
-    throw new AppError(403, 'PROFILE_MISSING', 'Your account is incomplete.');
+    throw new AppError(
+      403,
+      'PROFILE_MISSING',
+      'Your account is missing a profile. Contact the administrator.'
+    );
   }
   if (!row.is_active) {
-    throw new AppError(403, 'ACCOUNT_INACTIVE', 'Your account has been deactivated.');
+    throw new AppError(
+      403,
+      'ACCOUNT_INACTIVE',
+      'Your account has been deactivated. Contact the administrator to restore access.'
+    );
   }
 
   request.user = { id: row.id, role: row.role, isActive: row.is_active };
@@ -64,7 +80,7 @@ export function requireRole(role: UserRole): RequestHandler {
       return;
     }
     if (request.user.role !== role) {
-      next(new AppError(403, 'FORBIDDEN', 'You do not have access to this resource.'));
+      next(new AppError(403, 'FORBIDDEN', 'You do not have permission to do that.'));
       return;
     }
     next();

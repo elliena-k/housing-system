@@ -13,7 +13,11 @@ async function studentsByIds(ids: string[]): Promise<Map<string, StudentRow>> {
   const { data, error } = await admin.from('students').select('*').in('id', ids);
 
   if (error) {
-    throw new AppError(500, 'STUDENTS_LOOKUP_FAILED', 'Could not load student details.');
+    throw new AppError(
+      500,
+      'STUDENTS_LOOKUP_FAILED',
+      'We could not load student details. Please try again.'
+    );
   }
 
   return new Map(((data ?? []) as StudentRow[]).map((student) => [student.id, student]));
@@ -39,7 +43,11 @@ export async function listApplications(
       .limit(200);
 
     if (error) {
-      throw new AppError(500, 'STUDENTS_LOOKUP_FAILED', 'Could not search students.');
+      throw new AppError(
+        500,
+        'STUDENTS_LOOKUP_FAILED',
+        'We could not search students. Please try again.'
+      );
     }
 
     studentIds = ((data ?? []) as { id: string }[]).map((row) => row.id);
@@ -66,7 +74,11 @@ export async function listApplications(
   const { data, error } = await query;
 
   if (error) {
-    throw new AppError(500, 'APPLICATIONS_LOOKUP_FAILED', 'Could not load applications.');
+    throw new AppError(
+      500,
+      'APPLICATIONS_LOOKUP_FAILED',
+      'We could not load applications. Please try again.'
+    );
   }
 
   const applications = (data ?? []) as ApplicationRow[];
@@ -89,10 +101,18 @@ export async function getApplicationForAdmin(id: string): Promise<ApplicationWit
     .maybeSingle();
 
   if (error) {
-    throw new AppError(500, 'APPLICATION_LOOKUP_FAILED', 'Could not load that application.');
+    throw new AppError(
+      500,
+      'APPLICATION_LOOKUP_FAILED',
+      'We could not load that application. Please try again.'
+    );
   }
   if (!data) {
-    throw new AppError(404, 'APPLICATION_NOT_FOUND', 'That application was not found.');
+    throw new AppError(
+      404,
+      'APPLICATION_NOT_FOUND',
+      'That application was not found. Refresh the list and try again.'
+    );
   }
 
   return attachStudent(data as ApplicationRow);
@@ -111,10 +131,18 @@ export async function reviewApplication(
     .maybeSingle();
 
   if (currentError) {
-    throw new AppError(500, 'APPLICATION_LOOKUP_FAILED', 'Could not load that application.');
+    throw new AppError(
+      500,
+      'APPLICATION_LOOKUP_FAILED',
+      'We could not load that application. Please try again.'
+    );
   }
   if (!current) {
-    throw new AppError(404, 'APPLICATION_NOT_FOUND', 'That application was not found.');
+    throw new AppError(
+      404,
+      'APPLICATION_NOT_FOUND',
+      'That application was not found. Refresh the list and try again.'
+    );
   }
 
   const application = current as ApplicationRow;
@@ -122,7 +150,7 @@ export async function reviewApplication(
     throw new AppError(
       409,
       'INVALID_STATUS_TRANSITION',
-      'Only pending applications can be reviewed.'
+      'Only pending applications can be reviewed. Refresh to see the latest status.'
     );
   }
 
@@ -139,7 +167,11 @@ export async function reviewApplication(
     .single();
 
   if (error) {
-    throw new AppError(500, 'APPLICATION_REVIEW_FAILED', 'Could not review the application.');
+    throw new AppError(
+      500,
+      'APPLICATION_REVIEW_FAILED',
+      'We could not save the review. Please try again.'
+    );
   }
 
   await admin.from('audit_logs').insert({

@@ -16,7 +16,11 @@ function assertProfileComplete(student: StudentRow): void {
   ];
 
   if (required.some((value) => !value) || !student.level) {
-    throw new AppError(422, 'PROFILE_INCOMPLETE', 'Complete your student profile before applying.');
+    throw new AppError(
+      422,
+      'PROFILE_INCOMPLETE',
+      'Complete your student profile before applying. Add your faculty, department, and level first.'
+    );
   }
 }
 
@@ -34,7 +38,11 @@ export async function createApplication(
 
   const student = await getStudentForUser(userId);
   if (!student) {
-    throw new AppError(403, 'PROFILE_MISSING', 'Create your student profile before applying.');
+    throw new AppError(
+      403,
+      'PROFILE_MISSING',
+      'Create your student profile before applying. Contact the administrator if you need help.'
+    );
   }
   assertProfileComplete(student);
 
@@ -56,13 +64,25 @@ export async function createApplication(
     ]);
 
   if (existingError || allocationError) {
-    throw new AppError(500, 'APPLICATION_CHECK_FAILED', 'Could not check your eligibility.');
+    throw new AppError(
+      500,
+      'APPLICATION_CHECK_FAILED',
+      'We could not check your eligibility. Please try again.'
+    );
   }
   if (existing) {
-    throw new AppError(409, 'APPLICATION_EXISTS', 'You have already applied for this session.');
+    throw new AppError(
+      409,
+      'APPLICATION_EXISTS',
+      'You have already applied for this session. Check the status of your application.'
+    );
   }
   if (allocation) {
-    throw new AppError(409, 'ALREADY_ALLOCATED', 'You already hold a room allocation.');
+    throw new AppError(
+      409,
+      'ALREADY_ALLOCATED',
+      'You already hold a room allocation. View it on your dashboard.'
+    );
   }
 
   const { data, error } = await admin
@@ -77,9 +97,17 @@ export async function createApplication(
 
   if (error) {
     if (error.code === '23505') {
-      throw new AppError(409, 'APPLICATION_EXISTS', 'You have already applied for this session.');
+      throw new AppError(
+        409,
+        'APPLICATION_EXISTS',
+        'You have already applied for this session. Check the status of your application.'
+      );
     }
-    throw new AppError(500, 'APPLICATION_FAILED', 'Could not submit your application.');
+    throw new AppError(
+      500,
+      'APPLICATION_FAILED',
+      'We could not submit your application. Please try again.'
+    );
   }
 
   return data as ApplicationRow;
@@ -88,7 +116,11 @@ export async function createApplication(
 export async function listMyApplications(userId: string): Promise<ApplicationRow[]> {
   const student = await getStudentForUser(userId);
   if (!student) {
-    throw new AppError(404, 'STUDENT_NOT_FOUND', 'Your student profile was not found.');
+    throw new AppError(
+      404,
+      'STUDENT_NOT_FOUND',
+      'Your student profile was not found. Contact the administrator if this is unexpected.'
+    );
   }
 
   const admin = getSupabaseAdmin();
@@ -99,7 +131,11 @@ export async function listMyApplications(userId: string): Promise<ApplicationRow
     .order('application_date', { ascending: false });
 
   if (error) {
-    throw new AppError(500, 'APPLICATIONS_LOOKUP_FAILED', 'Could not load your applications.');
+    throw new AppError(
+      500,
+      'APPLICATIONS_LOOKUP_FAILED',
+      'We could not load your applications. Please try again.'
+    );
   }
 
   return (data ?? []) as ApplicationRow[];
@@ -108,7 +144,11 @@ export async function listMyApplications(userId: string): Promise<ApplicationRow
 export async function getMyApplication(userId: string, id: string): Promise<ApplicationRow> {
   const student = await getStudentForUser(userId);
   if (!student) {
-    throw new AppError(404, 'STUDENT_NOT_FOUND', 'Your student profile was not found.');
+    throw new AppError(
+      404,
+      'STUDENT_NOT_FOUND',
+      'Your student profile was not found. Contact the administrator if this is unexpected.'
+    );
   }
 
   const admin = getSupabaseAdmin();
@@ -120,10 +160,18 @@ export async function getMyApplication(userId: string, id: string): Promise<Appl
     .maybeSingle();
 
   if (error) {
-    throw new AppError(500, 'APPLICATION_LOOKUP_FAILED', 'Could not load that application.');
+    throw new AppError(
+      500,
+      'APPLICATION_LOOKUP_FAILED',
+      'We could not load that application. Please try again.'
+    );
   }
   if (!data) {
-    throw new AppError(404, 'APPLICATION_NOT_FOUND', 'That application was not found.');
+    throw new AppError(
+      404,
+      'APPLICATION_NOT_FOUND',
+      'That application was not found. Refresh the list and try again.'
+    );
   }
 
   return data as ApplicationRow;

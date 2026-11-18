@@ -132,3 +132,26 @@ when a decision changes.
 - **Alternatives:** A single container on one host.
 - **Consequences:** Each layer is configured independently through environment
   variables. `CORS_ORIGIN` and `VITE_API_URL` must match the deployed origins.
+
+## D-014 — Forms, dropdowns and feedback
+
+- **Context:** Native selects cannot be styled consistently and form feedback was
+  spread across ad-hoc messages.
+- **Decision:** Use a custom accessible combobox built over a hidden native
+  select, mark required and optional fields explicitly, show errors with a
+  clear next step, use toasts for successful actions, and require every async
+  button and page load to show a spinner with progress text.
+- **Alternatives:** Keep native selects and inline-only feedback.
+- **Consequences:** The interface is consistent and accessible. The custom select
+  keeps React Hook Form integration through the hidden native element.
+
+## D-015 — UX pass structure
+
+- **Context:** Pages had inconsistent navigation, loading, empty, and filter
+  behaviour.
+- **Decision:** Move to a sidebar/mobile-drawer shell, introduce shared cards,
+  skeletons, empty states, drawers and confirmation dialogs, make registration a
+  three-step form, sync filters to the URL, and add an admin students page.
+- **Alternatives:** Incremental page-by-page polish without a shared shell.
+- **Consequences:** Pages share one navigation and feedback model. URL filters make
+  state shareable. Dark mode and server-side pagination remain deferred.

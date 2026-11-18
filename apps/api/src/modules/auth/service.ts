@@ -23,10 +23,18 @@ export async function registerStudent(input: RegisterInput): Promise<RegisteredA
     .maybeSingle();
 
   if (matricError) {
-    throw new AppError(500, 'REGISTRATION_FAILED', 'Could not check your details.');
+    throw new AppError(
+      500,
+      'REGISTRATION_FAILED',
+      'We could not check your details. Please try again.'
+    );
   }
   if (matricMatch) {
-    throw new AppError(409, 'MATRIC_TAKEN', 'That matriculation number is already registered.');
+    throw new AppError(
+      409,
+      'MATRIC_TAKEN',
+      'That matriculation number is already registered. Sign in instead or use a different number.'
+    );
   }
 
   const { data: emailMatch, error: emailError } = await admin
@@ -36,10 +44,18 @@ export async function registerStudent(input: RegisterInput): Promise<RegisteredA
     .maybeSingle();
 
   if (emailError) {
-    throw new AppError(500, 'REGISTRATION_FAILED', 'Could not check your details.');
+    throw new AppError(
+      500,
+      'REGISTRATION_FAILED',
+      'We could not check your details. Please try again.'
+    );
   }
   if (emailMatch) {
-    throw new AppError(409, 'EMAIL_TAKEN', 'That email address is already registered.');
+    throw new AppError(
+      409,
+      'EMAIL_TAKEN',
+      'That email address is already registered. Sign in instead or use a different email.'
+    );
   }
 
   const { data: created, error: createError } = await admin.auth.admin.createUser({
@@ -50,9 +66,17 @@ export async function registerStudent(input: RegisterInput): Promise<RegisteredA
 
   if (createError || !created.user) {
     if (createError?.code === 'email_exists' || isUniqueViolation(createError)) {
-      throw new AppError(409, 'EMAIL_TAKEN', 'That email address is already registered.');
+      throw new AppError(
+        409,
+        'EMAIL_TAKEN',
+        'That email address is already registered. Sign in instead or use a different email.'
+      );
     }
-    throw new AppError(500, 'REGISTRATION_FAILED', 'Could not create your account.');
+    throw new AppError(
+      500,
+      'REGISTRATION_FAILED',
+      'We could not create your account. Please try again.'
+    );
   }
 
   const userId = created.user.id;
@@ -64,7 +88,11 @@ export async function registerStudent(input: RegisterInput): Promise<RegisteredA
     });
 
     if (profileError) {
-      throw new AppError(500, 'REGISTRATION_FAILED', 'Could not create your profile.');
+      throw new AppError(
+        500,
+        'REGISTRATION_FAILED',
+        'We could not create your profile. Please try again.'
+      );
     }
 
     const { data: student, error: studentError } = await admin
@@ -92,7 +120,11 @@ export async function registerStudent(input: RegisterInput): Promise<RegisteredA
           'Those student details are already registered.'
         );
       }
-      throw new AppError(500, 'REGISTRATION_FAILED', 'Could not save your student details.');
+      throw new AppError(
+        500,
+        'REGISTRATION_FAILED',
+        'We could not save your student details. Please try again.'
+      );
     }
 
     return {
@@ -104,6 +136,10 @@ export async function registerStudent(input: RegisterInput): Promise<RegisteredA
     if (error instanceof AppError) {
       throw error;
     }
-    throw new AppError(500, 'REGISTRATION_FAILED', 'Could not complete registration.');
+    throw new AppError(
+      500,
+      'REGISTRATION_FAILED',
+      'We could not complete registration. Please try again.'
+    );
   }
 }

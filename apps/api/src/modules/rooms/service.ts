@@ -22,7 +22,7 @@ export async function listRooms(filters: RoomFilters): Promise<RoomRow[]> {
   const { data, error } = await query;
 
   if (error) {
-    throw new AppError(500, 'ROOMS_LOOKUP_FAILED', 'Could not load rooms.');
+    throw new AppError(500, 'ROOMS_LOOKUP_FAILED', 'We could not load rooms. Please try again.');
   }
 
   return (data ?? []) as RoomRow[];
@@ -39,7 +39,11 @@ export async function listAvailableRooms(hostelId?: string): Promise<RoomRow[]> 
   const { data, error } = await query;
 
   if (error) {
-    throw new AppError(500, 'ROOMS_LOOKUP_FAILED', 'Could not load available rooms.');
+    throw new AppError(
+      500,
+      'ROOMS_LOOKUP_FAILED',
+      'We could not load available rooms. Please try again.'
+    );
   }
 
   // A room only has free space when occupancy is below capacity. The database
@@ -57,10 +61,18 @@ export async function createRoom(input: CreateRoomInput): Promise<RoomRow> {
     .maybeSingle();
 
   if (hostelError) {
-    throw new AppError(500, 'ROOM_CREATE_FAILED', 'Could not check the hostel.');
+    throw new AppError(
+      500,
+      'ROOM_CREATE_FAILED',
+      'We could not check the hostel. Please try again.'
+    );
   }
   if (!hostel) {
-    throw new AppError(404, 'HOSTEL_NOT_FOUND', 'That hostel was not found.');
+    throw new AppError(
+      404,
+      'HOSTEL_NOT_FOUND',
+      'That hostel was not found. Refresh the list and try again.'
+    );
   }
 
   const { data, error } = await admin
@@ -74,13 +86,17 @@ export async function createRoom(input: CreateRoomInput): Promise<RoomRow> {
       throw new AppError(
         409,
         'ROOM_NUMBER_TAKEN',
-        'That room number already exists in this hostel.'
+        'That room number already exists in this hostel. Choose a different number.'
       );
     }
     if (error.code === '23503') {
-      throw new AppError(404, 'HOSTEL_NOT_FOUND', 'That hostel was not found.');
+      throw new AppError(
+        404,
+        'HOSTEL_NOT_FOUND',
+        'That hostel was not found. Refresh the list and try again.'
+      );
     }
-    throw new AppError(500, 'ROOM_CREATE_FAILED', 'Could not add the room.');
+    throw new AppError(500, 'ROOM_CREATE_FAILED', 'We could not add the room. Please try again.');
   }
 
   return data as RoomRow;
@@ -100,21 +116,29 @@ export async function updateRoom(id: string, input: UpdateRoomInput): Promise<Ro
       throw new AppError(
         409,
         'ROOM_NUMBER_TAKEN',
-        'That room number already exists in this hostel.'
+        'That room number already exists in this hostel. Choose a different number.'
       );
     }
     if (error.code === '23514') {
       throw new AppError(
         409,
         'CAPACITY_BELOW_OCCUPANCY',
-        'Capacity cannot be lower than the number of occupants.'
+        'Capacity cannot be lower than the current number of occupants.'
       );
     }
-    throw new AppError(500, 'ROOM_UPDATE_FAILED', 'Could not update the room.');
+    throw new AppError(
+      500,
+      'ROOM_UPDATE_FAILED',
+      'We could not update the room. Please try again.'
+    );
   }
 
   if (!data) {
-    throw new AppError(404, 'ROOM_NOT_FOUND', 'That room was not found.');
+    throw new AppError(
+      404,
+      'ROOM_NOT_FOUND',
+      'That room was not found. Refresh the list and try again.'
+    );
   }
 
   return data as RoomRow;

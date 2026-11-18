@@ -89,6 +89,8 @@ Database migrations live in `supabase/migrations`.
 - Administrator hostel and room management with an availability filter
 - Application review (approve or reject), room allocation, cancellation, and dashboard statistics
 - Rate limiting, request limits, redacted logs, readiness checks, and an error boundary
+- Custom accessible dropdowns, toast notifications, required-field indicators, and actionable error messages
+- Sidebar navigation, multi-step registration, admin students page, URL-synced filters, and confirmation dialogs
 - Row-level security and a lock-safe allocation function in the database
 
 ## Scripts
@@ -134,6 +136,19 @@ Create a Vercel project with `apps/web` as the root directory:
 build on every push to `main` and on pull requests.
 
 See `docs/TEST-PLAN.md` for the acceptance suite.
+
+## Troubleshooting
+
+### Termux / Android: Rollup native module
+
+If Vite fails with `Cannot find module @rollup/rollup-android-arm64`, install the
+matching Android binary without changing tracked files:
+
+```bash
+npm install --no-save --package-lock=false "@rollup/rollup-android-arm64@$(node -p "require('rollup/package.json').version")"
+```
+
+Re-run this if a later `npm install` removes the package.
 
 ## Documentation
 

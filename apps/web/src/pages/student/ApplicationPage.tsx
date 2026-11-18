@@ -1,8 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { EmptyState } from '../../components/EmptyState';
+import { ErrorState } from '../../components/ErrorState';
+import { LoadingState } from '../../components/LoadingState';
 import { PageHeader } from '../../components/PageHeader';
 import { StatusBadge } from '../../components/StatusBadge';
 import { authedFetch } from '../../lib/api';
+import { errorInfo } from '../../lib/errors';
+import { formatDate } from '../../lib/format';
 import type { Application } from '../../lib/types';
 
 export function ApplicationPage() {
@@ -12,14 +17,16 @@ export function ApplicationPage() {
   });
 
   if (applicationsQuery.isLoading) {
-    return <p className="text-ink-600">Loading your application...</p>;
+    return <LoadingState message="Loading your application..." />;
   }
 
   if (applicationsQuery.isError || !applicationsQuery.data) {
     return (
-      <div className="rounded-md border border-danger bg-danger-light px-4 py-3 text-sm text-danger-dark">
-        Could not load your application.
-      </div>
+      <ErrorState
+        message={errorInfo(applicationsQuery.error, 'We could not load your application.').message}
+        onRetry={() => void applicationsQuery.refetch()}
+        retrying={applicationsQuery.isFetching}
+      />
     );
   }
 
@@ -29,12 +36,18 @@ export function ApplicationPage() {
     return (
       <div>
         <PageHeader title="Your application" />
-        <div className="rounded-lg border border-ink-200 bg-surface p-6 shadow-sm">
-          <p className="text-ink-700">You have not submitted an application yet.</p>
-          <Link className="mt-3 inline-block underline" to="/student/apply">
-            Apply for accommodation
-          </Link>
-        </div>
+        <EmptyState
+          title="No application yet"
+          description="You have not submitted a housing application for the current session."
+          action={
+            <Link
+              className="inline-flex min-h-[44px] items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-600"
+              to="/student/apply"
+            >
+              Apply for accommodation
+            </Link>
+          }
+        />
       </div>
     );
   }
@@ -55,7 +68,7 @@ export function ApplicationPage() {
           </div>
           <div>
             <dt className="text-ink-500">Date submitted</dt>
-            <dd className="font-medium">{application.application_date}</dd>
+            <dd className="font-medium">{formatDate(application.application_date)}</dd>
           </div>
           <div>
             <dt className="text-ink-500">Preference</dt>

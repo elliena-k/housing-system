@@ -5,15 +5,20 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/Button';
+import { ErrorState } from '../../components/ErrorState';
+import { LoadingState } from '../../components/LoadingState';
 import { FormError } from '../../components/FormError';
 import { PageHeader } from '../../components/PageHeader';
 import { TextField } from '../../components/TextField';
+import { useToast } from '../../components/Toast';
 import { authedFetch } from '../../lib/api';
+import { errorInfo } from '../../lib/errors';
 import type { Application, MyAccount, StudentStatus } from '../../lib/types';
 
 export function ApplyPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const accountQuery = useQuery({
     queryKey: ['account'],
@@ -44,6 +49,11 @@ export function ApplyPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['status'] });
       queryClient.invalidateQueries({ queryKey: ['applications'] });
+      toast({
+        title: 'Application submitted',
+        description: 'You can track its status from your dashboard.',
+        variant: 'success',
+      });
       navigate('/student/application', { replace: true });
     },
   });
@@ -53,14 +63,19 @@ export function ApplyPage() {
   });
 
   if (accountQuery.isLoading || statusQuery.isLoading) {
-    return <p className="text-ink-600">Loading your application form...</p>;
+    return <LoadingState message="Loading your application form..." />;
   }
 
   if (accountQuery.isError || statusQuery.isError || !accountQuery.data) {
     return (
-      <div className="rounded-md border border-danger bg-danger-light px-4 py-3 text-sm text-danger-dark">
-        Could not load your application form. Please refresh the page.
-      </div>
+      <ErrorState
+        message="We could not load your application form. Please try again."
+        onRetry={() => {
+          void accountQuery.refetch();
+          void statusQuery.refetch();
+        }}
+        retrying={accountQuery.isFetching || statusQuery.isFetching}
+      />
     );
   }
 
@@ -69,7 +84,10 @@ export function ApplyPage() {
   if (!student) {
     return (
       <div className="rounded-md border border-warning bg-warning-light px-4 py-3 text-sm text-warning-dark">
-        Your student profile is incomplete. Contact the administrator.
+        <p>Your student profile is incomplete. Contact the administrator for help.</p>
+        <Link className="mt-2 inline-block font-medium underline" to="/student/profile">
+          Review your profile
+        </Link>
       </div>
     );
   }
@@ -122,6 +140,39 @@ export function ApplyPage() {
               <dd className="font-medium">{session}</dd>
             </div>
           </dl>
+
+          <div className="mt-5 border-t border-ink-100 pt-4">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-500">
+              Before you apply
+            </h2>
+            <ul className="mt-2 space-y-2 text-sm">
+              <li className="flex items-start gap-2 text-ink-700">
+                <span className="mt-0.5 text-success" aria-hidden="true">
+                  ✓
+                </span>
+                <span>Your profile is complete.</span>
+              </li>
+              <li className="flex items-start gap-2 text-ink-700">
+                <span className="mt-0.5 text-success" aria-hidden="true">
+                  ✓
+                </span>
+                <span>You have not applied for this session.</span>
+              </li>
+              <li className="flex items-start gap-2 text-ink-700">
+                <span
+                  className={`mt-0.5 ${statusQuery.data?.allocation ? 'text-warning' : 'text-success'}`}
+                  aria-hidden="true"
+                >
+                  {statusQuery.data?.allocation ? '!' : '✓'}
+                </span>
+                <span>
+                  {statusQuery.data?.allocation
+                    ? 'You already hold an allocation. Contact the administrator if this is unexpected.'
+                    : 'You do not hold an active allocation.'}
+                </span>
+              </li>
+            </ul>
+          </div>
         </section>
 
         <form
@@ -129,19 +180,33 @@ export function ApplyPage() {
           onSubmit={onSubmit}
           noValidate
         >
-          <FormError message={mutation.error instanceof Error ? mutation.error.message : null} />
+          <FormError
+            message={mutation.error ? errorInfo(mutation.error).message : null}
+            code={mutation.error ? errorInfo(mutation.error).code : undefined}
+            onRetry={() => {
+              void statusQuery.refetch();
+              void accountQuery.refetch();
+            }}
+            retrying={statusQuery.isFetching || accountQuery.isFetching}
+          />
           <input type="hidden" {...register('session')} />
           <TextField
-            label="Accommodation preference (optional)"
+            label="Accommodation preference"
+            requirement="optional"
             placeholder="e.g. Queen Idia Hall"
+            hint="We will try to match your preference, but it is not guaranteed."
             error={errors.preference?.message}
             {...register('preference')}
           />
           <p className="text-sm text-ink-600">
             Submit one application per session. You can check its status from your dashboard.
           </p>
-          <Button type="submit" disabled={isSubmitting || mutation.isPending}>
-            {isSubmitting || mutation.isPending ? 'Submitting...' : 'Submit application'}
+          <Button
+            type="submit"
+            loading={isSubmitting || mutation.isPending}
+            loadingLabel="Submitting..."
+          >
+            Submit application
           </Button>
         </form>
       </div>
