@@ -5,16 +5,25 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../auth/AuthProvider';
 import { Button } from '../../components/Button';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { EmptyState } from '../../components/EmptyState';
 import { FormError } from '../../components/FormError';
+import { TableSkeleton } from '../../components/Skeleton';
+import { Spinner } from '../../components/Spinner';
 import { PageHeader } from '../../components/PageHeader';
 import { SelectField } from '../../components/SelectField';
+import { useToast } from '../../components/Toast';
 import { authedFetch } from '../../lib/api';
+import { errorInfo } from '../../lib/errors';
+import { formatDate } from '../../lib/format';
 import type { AllocationListItem, ApplicationWithStudent, Hostel, Room } from '../../lib/types';
 
 export function AdminAllocationsPage() {
   const queryClient = useQueryClient();
   const { openSession } = useAuth();
+  const { toast } = useToast();
   const [hostelId, setHostelId] = useState('');
+  const [pendingCancel, setPendingCancel] = useState<AllocationListItem | null>(null);
 
   const approvedQuery = useQuery({
     queryKey: ['admin', 'applications', 'approved', openSession],
@@ -85,6 +94,11 @@ export function AdminAllocationsPage() {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       reset({ application_id: '', room_id: '' });
       setHostelId('');
+      toast({
+        title: 'Room allocated',
+        description: 'The student now has an active allocation.',
+        variant: 'success',
+      });
     },
   });
 
@@ -99,12 +113,30 @@ export function AdminAllocationsPage() {
       queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'rooms'] });
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
+      toast({
+        title: 'Allocation cancelled',
+        description: 'The bed has been freed and the application returned to approved.',
+        variant: 'success',
+      });
     },
   });
 
   const onSubmit = handleSubmit(async (values) => {
     await allocationMutation.mutateAsync(values);
   });
+
+  const handleConfirmCancel = async () => {
+    if (!pendingCancel) {
+      return;
+    }
+
+    try {
+      await cancelMutation.mutateAsync(pendingCancel.id);
+      setPendingCancel(null);
+    } catch {
+      setPendingCancel(null);
+    }
+  };
 
   const rooms = roomsQuery.data ?? [];
   const allocations = allocationsQuery.data ?? [];
@@ -126,13 +158,24 @@ export function AdminAllocationsPage() {
             Allocate a room
           </h2>
           <FormError
-            message={
-              allocationMutation.error instanceof Error ? allocationMutation.error.message : null
-            }
+            message={allocationMutation.error ? errorInfo(allocationMutation.error).message : null}
+            code={allocationMutation.error ? errorInfo(allocationMutation.error).code : undefined}
+            onRetry={() => void roomsQuery.refetch()}
+            retrying={roomsQuery.isFetching}
           />
+          {approvedQuery.isError ? (
+            <FormError
+              message={
+                errorInfo(approvedQuery.error, 'We could not load approved applications.').message
+              }
+              onRetry={() => void approvedQuery.refetch()}
+              retrying={approvedQuery.isFetching}
+            />
+          ) : null}
 
           <SelectField
             label="Approved application"
+            requirement="required"
             error={errors.application_id?.message}
             {...register('application_id')}
           >
@@ -148,6 +191,7 @@ export function AdminAllocationsPage() {
 
           <SelectField
             label="Hostel"
+            requirement="required"
             value={hostelId}
             onChange={(event) => {
               setHostelId(event.target.value);
@@ -165,6 +209,7 @@ export function AdminAllocationsPage() {
 
           <SelectField
             label="Room"
+            requirement="required"
             error={errors.room_id?.message}
             disabled={!hostelId}
             {...register('room_id')}
@@ -185,6 +230,13 @@ export function AdminAllocationsPage() {
             ))}
           </SelectField>
 
+          {hostelId && roomsQuery.isLoading ? (
+            <span className="inline-flex items-center gap-1.5 text-xs text-ink-500">
+              <Spinner className="h-3.5 w-3.5" />
+              Loading available rooms...
+            </span>
+          ) : null}
+
           {approved.length === 0 ? (
             <p className="text-sm text-ink-600">
               There are no approved applications waiting for a room.
@@ -193,89 +245,133 @@ export function AdminAllocationsPage() {
 
           <Button
             type="submit"
-            disabled={isSubmitting || allocationMutation.isPending || !applicationId}
+            loading={isSubmitting || allocationMutation.isPending}
+            loadingLabel="Allocating..."
+            disabled={!applicationId}
           >
-            {allocationMutation.isPending ? 'Allocating...' : 'Allocate room'}
+            Allocate room
           </Button>
         </form>
 
-        <section className="overflow-hidden rounded-lg border border-ink-200 bg-surface shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-surface-1 text-xs uppercase tracking-wide text-ink-500">
-                <tr>
-                  <th className="px-4 py-3">Student</th>
-                  <th className="px-4 py-3">Matric</th>
-                  <th className="px-4 py-3">Hostel</th>
-                  <th className="px-4 py-3">Room</th>
-                  <th className="px-4 py-3">Date</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3" />
-                </tr>
-              </thead>
-              <tbody>
-                {allocationsQuery.isLoading ? (
+        <section className="space-y-3">
+          {cancelMutation.error ? (
+            <FormError
+              message={errorInfo(cancelMutation.error).message}
+              code={errorInfo(cancelMutation.error).code}
+              onRetry={() => void allocationsQuery.refetch()}
+              retrying={allocationsQuery.isFetching}
+            />
+          ) : null}
+          <div className="overflow-hidden rounded-lg border border-ink-200 bg-surface shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-surface-1 text-xs uppercase tracking-wide text-ink-500">
                   <tr>
-                    <td className="px-4 py-4 text-ink-600" colSpan={7}>
-                      Loading allocations...
-                    </td>
+                    <th className="px-4 py-3">Student</th>
+                    <th className="px-4 py-3">Matric</th>
+                    <th className="px-4 py-3">Hostel</th>
+                    <th className="px-4 py-3">Room</th>
+                    <th className="px-4 py-3">Date</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-4 py-3" />
                   </tr>
-                ) : null}
-                {allocationsQuery.isError ? (
-                  <tr>
-                    <td className="px-4 py-4 text-danger-dark" colSpan={7}>
-                      Could not load allocations.
-                    </td>
-                  </tr>
-                ) : null}
-                {!allocationsQuery.isLoading && allocations.length === 0 ? (
-                  <tr>
-                    <td className="px-4 py-4 text-ink-600" colSpan={7}>
-                      No allocations yet.
-                    </td>
-                  </tr>
-                ) : null}
-                {allocations.map((allocation) => (
-                  <tr key={allocation.id} className="border-t border-ink-100">
-                    <td className="px-4 py-3 font-medium text-ink-900">
-                      {allocation.student_name ?? '—'}
-                    </td>
-                    <td className="px-4 py-3 text-ink-600">{allocation.matric_no ?? '—'}</td>
-                    <td className="px-4 py-3 text-ink-600">{allocation.hostel_name ?? '—'}</td>
-                    <td className="px-4 py-3 text-ink-600">{allocation.room_number ?? '—'}</td>
-                    <td className="px-4 py-3 text-ink-600">
-                      {new Date(allocation.allocation_date).toLocaleDateString('en-GB')}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${
-                          allocation.status === 'active'
-                            ? 'border-success bg-success-light text-success-dark'
-                            : 'border-ink-300 bg-ink-100 text-ink-600'
-                        }`}
-                      >
-                        {allocation.status === 'active' ? 'Active' : 'Cancelled'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {allocation.status === 'active' ? (
+                </thead>
+                <tbody>
+                  {allocationsQuery.isLoading ? (
+                    <tr>
+                      <td colSpan={7}>
+                        <TableSkeleton rows={5} columns={7} />
+                      </td>
+                    </tr>
+                  ) : null}
+                  {allocationsQuery.isError ? (
+                    <tr>
+                      <td className="px-4 py-4 text-danger-dark" colSpan={7}>
+                        <span>We could not load allocations.</span>
                         <button
                           type="button"
-                          className="text-sm font-medium text-danger underline"
-                          disabled={cancelMutation.isPending}
-                          onClick={() => cancelMutation.mutate(allocation.id)}
+                          className="ml-2 font-medium underline"
+                          onClick={() => void allocationsQuery.refetch()}
                         >
-                          Cancel
+                          Try again
                         </button>
-                      ) : null}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      </td>
+                    </tr>
+                  ) : null}
+                  {!allocationsQuery.isLoading && allocations.length === 0 ? (
+                    <tr>
+                      <td colSpan={7}>
+                        <EmptyState
+                          title="No allocations yet"
+                          description="Allocate an approved application to create the first allocation."
+                          compact
+                        />
+                      </td>
+                    </tr>
+                  ) : null}
+                  {allocations.map((allocation) => (
+                    <tr key={allocation.id} className="border-t border-ink-100">
+                      <td className="px-4 py-3 font-medium text-ink-900">
+                        {allocation.student_name ?? '—'}
+                      </td>
+                      <td className="px-4 py-3 text-ink-600">{allocation.matric_no ?? '—'}</td>
+                      <td className="px-4 py-3 text-ink-600">{allocation.hostel_name ?? '—'}</td>
+                      <td className="px-4 py-3 text-ink-600">{allocation.room_number ?? '—'}</td>
+                      <td className="px-4 py-3 text-ink-600">
+                        {formatDate(allocation.allocation_date)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+                            allocation.status === 'active'
+                              ? 'border-success bg-success-light text-success-dark'
+                              : 'border-ink-300 bg-ink-100 text-ink-600'
+                          }`}
+                        >
+                          {allocation.status === 'active' ? 'Active' : 'Cancelled'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        {allocation.status === 'active' ? (
+                          <button
+                            type="button"
+                            className="text-sm font-medium text-danger underline"
+                            disabled={cancelMutation.isPending}
+                            onClick={() => cancelMutation.mutate(allocation.id)}
+                          >
+                            Cancel
+                          </button>
+                        ) : null}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
       </div>
+
+      <ConfirmDialog
+        open={Boolean(pendingCancel)}
+        title="Cancel allocation"
+        description={
+          pendingCancel
+            ? `Cancel the allocation for ${pendingCancel.student_name ?? 'this student'} in ${
+                pendingCancel.hostel_name ?? 'the hostel'
+              } ${pendingCancel.room_number ?? ''}? The bed will be freed and the application returned to approved.`
+            : ''
+        }
+        confirmLabel="Cancel allocation"
+        destructive
+        loading={cancelMutation.isPending}
+        onConfirm={() => void handleConfirmCancel()}
+        onCancel={() => {
+          if (!cancelMutation.isPending) {
+            setPendingCancel(null);
+          }
+        }}
+      />
     </div>
   );
 }

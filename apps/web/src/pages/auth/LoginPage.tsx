@@ -6,8 +6,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthProvider';
 import { Button } from '../../components/Button';
 import { FormError } from '../../components/FormError';
+import { PasswordField } from '../../components/PasswordField';
 import { TextField } from '../../components/TextField';
 import { apiFetch } from '../../lib/api';
+import { errorInfo } from '../../lib/errors';
 import { supabase } from '../../lib/supabase';
 import type { MyAccount } from '../../lib/types';
 
@@ -15,11 +17,15 @@ export function LoginPage() {
   const navigate = useNavigate();
   const { session, user, loading } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [serverErrorCode, setServerErrorCode] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
+    formState: { errors, isSubmitting, isValid },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    mode: 'onChange',
+  });
 
   useEffect(() => {
     if (!loading && session && user) {
@@ -29,9 +35,10 @@ export function LoginPage() {
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
+    setServerErrorCode(null);
 
     if (!supabase) {
-      setServerError('Supabase is not configured. Add the frontend environment variables.');
+      setServerError('The sign-in service is not configured. Contact the administrator.');
       return;
     }
 
@@ -41,7 +48,7 @@ export function LoginPage() {
     });
 
     if (error || !data.session) {
-      setServerError(error?.message ?? 'Could not sign in. Check your details and try again.');
+      setServerError('Email or password is incorrect. Check your details and try again.');
       return;
     }
 
@@ -51,9 +58,9 @@ export function LoginPage() {
       });
       navigate(account.user.role === 'admin' ? '/admin' : '/student', { replace: true });
     } catch (loadError) {
-      setServerError(
-        loadError instanceof Error ? loadError.message : 'Could not load your account.'
-      );
+      const info = errorInfo(loadError, 'We could not load your account. Please try again.');
+      setServerError(info.message);
+      setServerErrorCode(info.code ?? null);
     }
   });
 
@@ -70,23 +77,30 @@ export function LoginPage() {
         onSubmit={onSubmit}
         noValidate
       >
-        <FormError message={serverError} />
+        <FormError message={serverError} code={serverErrorCode ?? undefined} />
         <TextField
           label="Email address"
           type="email"
           autoComplete="email"
+          requirement="required"
           error={errors.email?.message}
           {...register('email')}
         />
-        <TextField
+        <PasswordField
           label="Password"
-          type="password"
           autoComplete="current-password"
+          requirement="required"
           error={errors.password?.message}
           {...register('password')}
         />
-        <Button className="w-full" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Signing in...' : 'Sign in'}
+        <Button
+          className="w-full"
+          type="submit"
+          loading={isSubmitting}
+          loadingLabel="Signing in..."
+          disabled={!isValid}
+        >
+          {isValid ? 'Sign in' : 'Enter your details'}
         </Button>
       </form>
 
